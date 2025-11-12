@@ -202,11 +202,50 @@ const AnnotatedTextComponent = () => {
       return [{ text, annotations: [] as AnnotationType[] }];
     }
 
+    // Filter out overlapping hearts (hearts should be specific to individual sentences)
+    const nonOverlappingHearts: AnnotationType[] = [];
+    const heartAnnotations = sortedAnnotations.filter(a => a.type === 'heart');
+    
+    heartAnnotations.forEach((heart) => {
+      // Check if this heart overlaps with any already-accepted hearts
+      const overlaps = nonOverlappingHearts.some(
+        existingHeart => 
+          !(heart.endIndex <= existingHeart.startIndex || heart.startIndex >= existingHeart.endIndex)
+      );
+      
+      if (!overlaps) {
+        nonOverlappingHearts.push(heart);
+      } else {
+        console.log('💔 SKIPPED OVERLAPPING HEART:', {
+          text: text.slice(heart.startIndex, heart.endIndex),
+          overlappedWith: nonOverlappingHearts.find(
+            h => !(heart.endIndex <= h.startIndex || heart.startIndex >= h.endIndex)
+          ),
+        });
+      }
+    });
+    
+    if (heartAnnotations.length > nonOverlappingHearts.length) {
+      console.log(`💖 HEARTS: ${heartAnnotations.length} total, ${nonOverlappingHearts.length} kept, ${heartAnnotations.length - nonOverlappingHearts.length} removed (overlapping)`);
+    }
+    
+    // Combine non-overlapping hearts with all squiggles/circles
+    const finalAnnotations = [
+      ...nonOverlappingHearts,
+      ...sortedAnnotations.filter(a => a.type !== 'heart')
+    ].sort((a, b) => {
+      if (a.startIndex !== b.startIndex) {
+        return a.startIndex - b.startIndex;
+      }
+      const priority = { 'circle': 0, 'squiggle-correction': 1, 'squiggle-suggestion': 2, 'heart': 3 };
+      return (priority[a.type as keyof typeof priority] || 4) - (priority[b.type as keyof typeof priority] || 4);
+    });
+
     // Create a map of positions to annotations to handle overlaps
     const positionMap = new Map<number, AnnotationType[]>();
     
     // For each character position, track which annotations cover it
-    sortedAnnotations.forEach((annotation) => {
+    finalAnnotations.forEach((annotation) => {
       for (let i = annotation.startIndex; i < annotation.endIndex; i++) {
         if (!positionMap.has(i)) {
           positionMap.set(i, []);
