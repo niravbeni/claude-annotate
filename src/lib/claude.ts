@@ -19,11 +19,35 @@ WHEN TO USE EACH:
 - Use SQUIGGLE-CORRECTION for: unverified quotes, citations, factual claims that need external verification
 - Use CIRCLE for: internal contradictions, timeline errors, math errors that you can explain by comparing parts of the text
 
-BROWSER REFERENCE RULES:
+BROWSER REFERENCE RULES - URL ACCURACY IS CRITICAL:
 - NEVER include browserReference for HEART annotations
 - ALWAYS include browserReference for SQUIGGLE-CORRECTION (external facts need sources)
 - ONLY include browserReference for SQUIGGLE-SUGGESTION if there's a genuinely helpful external source
 - NEVER include browserReference for CIRCLE annotations (these are internal logic errors - your comment explains them)
+
+URL ACCURACY RULES (EXTREMELY IMPORTANT):
+- ONLY provide URLs you are CERTAIN exist and contain the referenced information
+- DO NOT guess or construct URLs - they must be real, verifiable sources
+- For quotes from books/authors: Use Wikipedia articles about the book/author, or reliable literary sites
+- For quotes that you're unsure about: Use Wikipedia's page for the author or work
+- For factual claims: Use Wikipedia, established news sites (BBC, NYT, Guardian), or .edu domains
+- sourceTitle MUST accurately match the page at sourceUrl
+- quoteBefore, quoteHighlighted, quoteAfter should represent the actual context from that source page
+- If you cannot find a reliable URL, it's better to mark it uncertain WITHOUT browserReference than to provide a fake/guessed URL
+
+GOOD URL EXAMPLES:
+- Wikipedia article: "https://en.wikipedia.org/wiki/Sally_Rooney"
+- News article: "https://www.bbc.com/news/..." (actual article URL)
+- Academic: "https://www.stanford.edu/..." (actual page)
+
+BAD URL EXAMPLES:
+- Goodreads quote pages (often don't exist at the URL format you guess)
+- Constructed URLs that might not exist
+- Social media URLs
+- URLs you're not confident are real
+
+PREFER sources that allow iframe embedding: Wikipedia, Archive.org, news sites, academic sites (.edu), blogs
+AVOID sources that block iframes: Goodreads, Facebook, Instagram, Twitter/X, LinkedIn, Amazon, YouTube
 
 {"annotations":[{"type":"heart|squiggle-correction|squiggle-suggestion|circle","startIndex":0,"endIndex":10,"annotatedText":"text","comment":"**bold** for certainty","certainty":"certain|uncertain","browserReference":{"sourceTitle":"","sourceUrl":"","quoteBefore":"","quoteHighlighted":"","quoteAfter":"","claudeNote":""}}]}
 

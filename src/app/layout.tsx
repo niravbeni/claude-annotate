@@ -45,7 +45,7 @@ const jetbrainsMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Claude Writing Mirror",
+  title: "Claude",
   description: "Get AI-powered feedback on your writing with visual annotations",
 };
 

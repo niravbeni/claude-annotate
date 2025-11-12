@@ -7,7 +7,7 @@ import { BrowserModal } from '@/components/BrowserModal';
 import { useAppStore } from '@/lib/store';
 
 export default function Home() {
-  const { activeBrowserReference, isBrowserModalFullscreen, closeBrowserModal, toggleBrowserFullscreen } = useAppStore();
+  const { activeBrowserReference, isBrowserModalFullscreen, browserModalPosition, closeBrowserModal, toggleBrowserFullscreen } = useAppStore();
 
   return (
     <div className="flex flex-col h-screen" style={{ backgroundColor: '#FAF9F5' }}>
@@ -30,6 +30,7 @@ export default function Home() {
         <BrowserModal
           reference={activeBrowserReference}
           isFullscreen={isBrowserModalFullscreen}
+          triggerPosition={browserModalPosition}
           onClose={closeBrowserModal}
           onToggleFullscreen={toggleBrowserFullscreen}
         />

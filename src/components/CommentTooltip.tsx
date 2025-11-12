@@ -77,7 +77,13 @@ export function CommentTooltip({
                       />
                       {ann.type !== 'heart' && ann.browserReference && onReferenceClick && (
                         <button
-                          onClick={() => onReferenceClick(ann.browserReference!)}
+                          onClick={(e) => {
+                            const rect = e.currentTarget.getBoundingClientRect();
+                            onReferenceClick(ann.browserReference!, {
+                              x: rect.left + rect.width / 2,
+                              y: rect.bottom
+                            });
+                          }}
                           className="inline-flex items-center justify-center ml-1 w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors cursor-pointer"
                           style={{ verticalAlign: 'baseline', transform: 'translateY(2px)' }}
                           aria-label="View reference"

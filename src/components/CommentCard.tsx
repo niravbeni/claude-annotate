@@ -82,7 +82,13 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onReferenceClick(annotation.browserReference!)}
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              onReferenceClick(annotation.browserReference!, {
+                x: rect.left + rect.width / 2,
+                y: rect.bottom
+              });
+            }}
             className="text-ui-body-small-bold cursor-pointer"
           >
             View Reference

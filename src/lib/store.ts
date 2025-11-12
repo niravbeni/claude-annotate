@@ -12,6 +12,7 @@ export const useAppStore = create<AppState>((set) => ({
   commentHistory: [],
   activeBrowserReference: null,
   isBrowserModalFullscreen: false,
+  browserModalPosition: null,
 
   // Actions
   setText: (text) =>
@@ -92,15 +93,17 @@ export const useAppStore = create<AppState>((set) => ({
       annotationsVisible: !state.annotationsVisible,
     })),
 
-  openBrowserModal: (reference) =>
+  openBrowserModal: (reference, position) =>
     set({
       activeBrowserReference: reference,
+      browserModalPosition: position,
       isBrowserModalFullscreen: false,
     }),
 
   closeBrowserModal: () =>
     set({
       activeBrowserReference: null,
+      browserModalPosition: null,
       isBrowserModalFullscreen: false,
     }),
 

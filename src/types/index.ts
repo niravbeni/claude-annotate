@@ -38,13 +38,14 @@ export interface AppState {
   // Browser modal
   activeBrowserReference: BrowserReference | null;
   isBrowserModalFullscreen: boolean;
+  browserModalPosition: { x: number; y: number } | null;
 
   // Actions
   setText: (text: string) => void;
   startAnalysis: () => void;
   finishAnalysis: (annotations: Annotation[]) => void;
   toggleAnnotations: () => void;
-  openBrowserModal: (reference: BrowserReference) => void;
+  openBrowserModal: (reference: BrowserReference, position: { x: number; y: number }) => void;
   closeBrowserModal: () => void;
   toggleBrowserFullscreen: () => void;
   resetToDefault: () => void;
@@ -66,18 +67,19 @@ export interface CommentTooltipProps {
   hasBrowserLink?: boolean;
   onBrowserLinkClick?: () => void;
   annotations?: Annotation[];
-  onReferenceClick?: (reference: BrowserReference) => void;
+  onReferenceClick?: (reference: BrowserReference, position: { x: number; y: number }) => void;
   children: React.ReactNode;
 }
 
 export interface CommentCardProps {
   annotation: Annotation;
-  onReferenceClick?: (reference: BrowserReference) => void;
+  onReferenceClick?: (reference: BrowserReference, position: { x: number; y: number }) => void;
 }
 
 export interface BrowserModalProps {
   reference: BrowserReference;
   isFullscreen: boolean;
+  triggerPosition: { x: number; y: number } | null;
   onClose: () => void;
   onToggleFullscreen: () => void;
 }
