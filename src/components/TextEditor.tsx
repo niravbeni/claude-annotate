@@ -5,7 +5,8 @@ import { AnalyzeButton } from './AnalyzeButton';
 import { AnnotatedText } from './AnnotatedText';
 import { LIMITS } from '@/lib/constants';
 import { toast } from 'sonner';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 
 export function TextEditor() {
   const {
@@ -23,6 +24,10 @@ export function TextEditor() {
   const editableRef = useRef<HTMLDivElement>(null);
   const textOnEditStart = useRef<string>('');
   const annotationsBeforeEdit = useRef<typeof annotations>([]);
+  
+  // Animation state for Claude icon
+  const [currentFrame, setCurrentFrame] = useState(0);
+  const totalFrames = 15; // thinking0.png to thinking14.png
   
   const setEditing = (editing: boolean) => {
     if (editing) {
@@ -124,6 +129,20 @@ export function TextEditor() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [text, isAnalyzing]);
 
+  // Animate Claude icon when analyzing
+  useEffect(() => {
+    if (isAnalyzing) {
+      const interval = setInterval(() => {
+        setCurrentFrame((prev) => (prev + 1) % totalFrames);
+      }, 80); // ~12.5 fps for smooth animation
+
+      return () => clearInterval(interval);
+    } else {
+      // Reset to first frame when not analyzing
+      setCurrentFrame(0);
+    }
+  }, [isAnalyzing]);
+
   const showAnnotations = annotations.length > 0 && !isEditing;
   const hasAnnotations = annotations.length > 0;
 
@@ -137,8 +156,20 @@ export function TextEditor() {
           {showAnnotations ? (
             <>
               {/* Annotated Text inside textbox outline */}
-              <div className="w-full min-h-[600px] p-4 pb-16 border rounded-lg bg-white overflow-auto relative">
+              <div className="w-full min-h-[600px] px-[36px] py-4 pt-[88px] pb-16 border rounded-lg bg-white overflow-auto relative">
                 <AnnotatedText />
+                
+                {/* Claude Icon - top left */}
+                <div className="absolute top-3 left-3 z-10">
+                  <Image
+                    src={`/images/thinking${currentFrame}.png`}
+                    alt="Claude"
+                    width={40}
+                    height={40}
+                    className="object-contain"
+                    priority
+                  />
+                </div>
                 
                 {/* Annotation Count - bottom center */}
                 <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 text-ui-body-small text-gray-500">
@@ -176,17 +207,31 @@ export function TextEditor() {
           ) : (
             <>
               {/* Edit mode - clean textarea for editing */}
-              <textarea
-                ref={textareaRef}
-                value={text}
-                onChange={(e) => setText(e.target.value)}
-                className="w-full min-h-[600px] p-4 pb-16 editor-text border rounded-lg bg-white resize-none focus:outline-none focus:ring-2 focus:ring-[#C6613F]"
-                style={{
-                  cursor: 'text',
-                }}
-                placeholder="Paste your text here..."
-                disabled={isAnalyzing}
-              />
+              <div className="relative">
+                <textarea
+                  ref={textareaRef}
+                  value={text}
+                  onChange={(e) => setText(e.target.value)}
+                  className="w-full min-h-[600px] px-[36px] py-4 pt-[88px] pb-16 editor-text border rounded-lg bg-white resize-none focus:outline-none focus:ring-2 focus:ring-[#C6613F]"
+                  style={{
+                    cursor: 'text',
+                  }}
+                  placeholder="Paste your text here..."
+                  disabled={isAnalyzing}
+                />
+                
+                {/* Claude Icon - top left */}
+                <div className="absolute top-3 left-3 z-10 pointer-events-none">
+                  <Image
+                    src={`/images/thinking${currentFrame}.png`}
+                    alt="Claude"
+                    width={40}
+                    height={40}
+                    className="object-contain"
+                    priority
+                  />
+                </div>
+              </div>
               
               {/* Action Buttons - positioned at bottom right */}
               <div className="absolute bottom-3 right-3 z-20 flex items-center gap-2">

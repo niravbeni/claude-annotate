@@ -23,21 +23,7 @@ export function AnalyzeButton({ isAnalyzing, isDisabled, onClick }: AnalyzeButto
       aria-label={isAnalyzing ? 'Analyzing text' : 'Send text for analysis'}
       aria-busy={isAnalyzing}
     >
-      {isAnalyzing ? (
-        <motion.div
-          animate={{ rotate: 360 }}
-          transition={{
-            duration: 1,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-          aria-hidden="true"
-        >
-          <Loader2 className="h-5 w-5 text-white" />
-        </motion.div>
-      ) : (
-        <ArrowUp className="h-5 w-5 text-white" aria-hidden="true" />
-      )}
+      <ArrowUp className="h-5 w-5 text-white" aria-hidden="true" />
     </button>
   );
 }
