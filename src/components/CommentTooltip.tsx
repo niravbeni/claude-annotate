@@ -47,7 +47,7 @@ export function CommentTooltip({
           onMouseLeave={() => setIsVisible(false)}
         >
           <div className="bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-80 max-w-xs cursor-pointer">
-            <div className="text-sm leading-relaxed text-gray-800 inline">
+            <div className="text-ui-body-small leading-relaxed text-gray-800 inline">
               <span
                 dangerouslySetInnerHTML={{
                   __html: certainty === 'uncertain' ? `≈ ${content}` : content,

@@ -49,11 +49,11 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-2">
           {getIcon()}
-          <span className="text-xs font-medium text-gray-600">
+          <span className="text-ui-body-extra-small font-medium text-gray-600">
             {getTypeLabel()}
           </span>
         </div>
-        <span className="text-xs text-gray-400">
+        <span className="text-ui-body-extra-small text-gray-400">
           {formatDistanceToNow(new Date(annotation.timestamp), {
             addSuffix: true,
           })}
@@ -61,14 +61,14 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
       </div>
 
       {/* Text Snippet */}
-      <div className="text-sm text-gray-700 mb-2 font-serif italic border-l-2 border-gray-300 pl-2">
+      <div className="text-claude-body-small text-gray-700 mb-2 italic border-l-2 border-gray-300 pl-2">
         "{annotation.annotatedText.substring(0, 80)}
         {annotation.annotatedText.length > 80 ? '...' : ''}"
       </div>
 
       {/* Comment Body */}
       <div
-        className="text-sm text-gray-800 leading-relaxed"
+        className="text-ui-body-small text-gray-800 leading-relaxed"
         dangerouslySetInnerHTML={{
           __html:
             annotation.certainty === 'uncertain'
@@ -83,7 +83,7 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
           variant="outline"
           size="sm"
           onClick={() => onReferenceClick(annotation.browserReference!)}
-          className="mt-3 w-full text-xs"
+          className="mt-3 w-full text-ui-body-small-bold"
         >
           View Reference
         </Button>

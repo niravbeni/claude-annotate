@@ -88,7 +88,7 @@ export function TextEditor() {
       {/* Status Header */}
       {showAnnotations && (
         <div className="sticky top-0 z-10 bg-white border-b px-8 py-3">
-          <div className="text-sm text-green-600 font-medium">
+          <div className="text-ui-body-small-bold text-green-600">
             {annotations.length} annotation{annotations.length !== 1 ? 's' : ''} found
           </div>
         </div>
@@ -120,7 +120,7 @@ export function TextEditor() {
 
             {isAnalyzing && (
               <div className="absolute inset-0 bg-gray-100 bg-opacity-60 flex items-center justify-center rounded-lg pointer-events-none">
-                <div className="text-gray-600">Analyzing...</div>
+                <div className="text-ui-body text-gray-600">Analyzing...</div>
               </div>
             )}
           </div>

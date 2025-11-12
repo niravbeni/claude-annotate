@@ -14,11 +14,11 @@ export function Header() {
     <header className="border-b bg-white px-4 sm:px-6 py-3 sm:py-4">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div className="flex items-center justify-between sm:justify-start gap-3 sm:gap-4">
-          <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
-            Claude Writing Mirror
+          <h1 className="text-ui-title text-gray-900">
+            Claude
           </h1>
           <div
-            className={`text-xs sm:text-sm ${
+            className={`text-ui-body-small ${
               isOverLimit
                 ? 'text-red-600 font-semibold'
                 : isNearLimit
@@ -39,7 +39,7 @@ export function Header() {
             />
             <label
               htmlFor="annotations-toggle"
-              className="text-xs sm:text-sm text-gray-700 cursor-pointer"
+              className="text-ui-body-small text-gray-700 cursor-pointer"
             >
               Show Annotations
             </label>

@@ -86,7 +86,7 @@ export function BrowserModal({
             {/* URL Bar */}
             <div className="flex-1 bg-white rounded-md px-3 py-1.5 flex items-center gap-2 border border-gray-200">
               <div className="w-3 h-3 rounded-full bg-green-500" />
-              <span className="text-sm text-gray-700 truncate">
+              <span className="text-ui-body-small text-gray-700 truncate">
                 {reference.sourceUrl}
               </span>
             </div>
@@ -117,14 +117,14 @@ export function BrowserModal({
           {/* Browser Content */}
           <div className="overflow-y-auto h-[calc(100%-56px)] p-8 bg-white">
             {/* Source Title */}
-            <h2 id="browser-modal-title" className="text-2xl font-bold text-gray-900 mb-6">
+            <h2 id="browser-modal-title" className="text-claude-heading text-gray-900 mb-6">
               {reference.sourceTitle}
             </h2>
 
             {/* Quote Context */}
             <div className="prose prose-lg max-w-none">
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
-                <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                <p className="text-claude-body text-gray-700 whitespace-pre-wrap">
                   {reference.quoteBefore}
                   <mark className="bg-orange-200 px-1 py-0.5 rounded">
                     {reference.quoteHighlighted}
@@ -135,11 +135,11 @@ export function BrowserModal({
 
               {/* Claude's Note */}
               <div className="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-                <p className="text-sm text-gray-600 font-medium mb-1">
+                <p className="text-ui-body-small-bold text-gray-600 mb-1">
                   Claude's Note:
                 </p>
                 <p
-                  className="text-gray-800"
+                  className="text-claude-body text-gray-800"
                   dangerouslySetInnerHTML={{
                     __html: formatComment(reference.claudeNote),
                   }}
