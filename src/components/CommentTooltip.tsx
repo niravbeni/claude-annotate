@@ -62,7 +62,7 @@ export function CommentTooltip({
                     {ann.type === 'heart' ? (
                       <Heart className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: '#C6613F', fill: '#C6613F', stroke: 'none' }} />
                     ) : ann.type === 'circle' ? (
-                      <CircleAlert className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: 'white', fill: '#C6613F', stroke: 'white' }} />
+                      <CircleAlert className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: 'white', fill: '#C6613F', stroke: 'white' }} />
                     ) : (
                       <Waves className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: '#C6613F', stroke: '#C6613F' }} />
                     )}
@@ -78,7 +78,8 @@ export function CommentTooltip({
                       {ann.type !== 'heart' && ann.browserReference && onReferenceClick && (
                         <button
                           onClick={() => onReferenceClick(ann.browserReference!)}
-                          className="inline-flex items-center justify-center ml-2 w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors align-middle cursor-pointer"
+                          className="inline-flex items-center justify-center ml-1 w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors cursor-pointer"
+                          style={{ verticalAlign: 'baseline', transform: 'translateY(2px)' }}
                           aria-label="View reference"
                           title="View reference"
                         >
@@ -100,7 +101,8 @@ export function CommentTooltip({
                   {hasBrowserLink && onBrowserLinkClick && (
                     <button
                       onClick={onBrowserLinkClick}
-                      className="inline-flex items-center justify-center ml-2 w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors align-middle cursor-pointer"
+                      className="inline-flex items-center justify-center ml-1 w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors cursor-pointer"
+                      style={{ verticalAlign: 'baseline', transform: 'translateY(2px)' }}
                       aria-label="View reference"
                       title="View reference"
                     >

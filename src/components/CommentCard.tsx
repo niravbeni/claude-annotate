@@ -18,7 +18,7 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
       case 'squiggle-suggestion':
         return <Waves className="h-4 w-4" style={{ color: '#C6613F' }} />;
       case 'circle':
-        return <CircleAlert className="h-4 w-4" style={{ color: 'white', fill: '#C6613F', stroke: 'white' }} />;
+        return <CircleAlert className="h-5 w-5" style={{ color: 'white', fill: '#C6613F', stroke: 'white' }} />;
     }
   };
 
