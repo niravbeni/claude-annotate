@@ -9,31 +9,45 @@ const MODEL = 'claude-sonnet-4-5-20250929';
 
 const SYSTEM_PROMPT = `Analyze the text and return annotations in JSON format. Types:
 1. "heart" - Strong writing with authentic voice (NO browserReference)
-2. "squiggle-correction" - Factual errors that need checking (include browserReference)
+2. "squiggle-correction" - Factual errors like incorrect quotes, citations, facts (ALWAYS include browserReference)
 3. "squiggle-suggestion" - Creative alternatives/uncertain ideas (include browserReference if helpful)
-4. "circle" - Logic/timeline inconsistencies/clear errors (include browserReference with correct fact)
+4. "circle" - Logic/timeline/math inconsistencies (include browserReference with correct fact)
+
+WHEN TO USE EACH:
+- Use SQUIGGLE-CORRECTION for: unverified quotes, citations, factual claims that might be wrong
+- Use CIRCLE for: internal contradictions, timeline errors, math errors within the text itself
 
 {"annotations":[{"type":"heart|squiggle-correction|squiggle-suggestion|circle","startIndex":0,"endIndex":10,"annotatedText":"text","comment":"**bold** for certainty","certainty":"certain|uncertain","browserReference":{"sourceTitle":"","sourceUrl":"","quoteBefore":"","quoteHighlighted":"","quoteAfter":"","claudeNote":""}}]}
 
 CRITICAL RULES FOR BOUNDARIES (READ CAREFULLY):
 
-1. COMPLETE SENTENCES ONLY:
+1. FOR HEARTS & SQUIGGLES - COMPLETE SENTENCES:
    - startIndex = START of first word
    - endIndex = AFTER final punctuation (., !, ?)
    - Include the ENTIRE sentence from start to period
-   - Example: "Fear lived in her chest then, a hard knot just below her ribs that made breathing deliberate work." (must include period!)
+   - Example: "Fear lived in her chest then, a hard knot just below her ribs that made breathing deliberate work."
 
-2. NEVER CROSS PARAGRAPHS:
+2. FOR CIRCLES - EXTREMELY PRECISE & MINIMAL:
+   - Only circle the EXACT problematic NUMBER, DATE, or FACT
+   - For timeline errors: Circle ONLY the year/date that creates the contradiction (e.g., "1954", "1992")
+   - For math errors: Circle ONLY the incorrect number
+   - Do NOT circle time phrases like "last month" - circle the specific date/year
+   - ABSOLUTE MAXIMUM: 5 words, but prefer 1-2 words
+   - Example: Circle "1954" NOT "By 1954, she'd found work"
+   - Example: Circle "1992" NOT "arrived in London in 1992"
+   - Example: Circle "1972" if it conflicts with "1954" later
+
+3. NEVER CROSS PARAGRAPHS:
    - Each paragraph = separate unit
    - Stop at paragraph breaks (newlines)
    - If text spans multiple paragraphs, create SEPARATE annotations for each paragraph
-   - DO NOT let startIndex and endIndex span across paragraph boundaries
 
-3. EXAMPLES:
-   ✓ GOOD: "She was seventeen, barely spoke English, and knew no one." (complete with period)
-   ✗ BAD: "She was seventeen, barely spoke English" (missing end)
-   ✓ GOOD: One annotation per paragraph
-   ✗ BAD: One annotation spanning two paragraphs
+4. EXAMPLES:
+   ✓ GOOD Heart: "She was seventeen, barely spoke English, and knew no one." (complete sentence)
+   ✓ GOOD Squiggle: "Fear isn't something you think about. It's something that thinks you." (the quote itself)
+   ✓ GOOD Circle: "1954" or "1992" (just the date/number causing the error)
+   ✗ BAD Heart: "She was seventeen, barely spoke English" (missing end)
+   ✗ BAD Circle: "By 1954, she'd found work at a textile factory in Hackney" (too much - just need "1954")
 
 Other Rules:
 - Use **bold** for certain comments (heart, circle)

@@ -144,33 +144,46 @@
   pointer-events: none;
 }
 
+/* Heart highlight without icon (for middle segments of split hearts) */
+.annotation-heart-body {
+  display: inline;
+  background: rgba(198, 97, 63, 0.15);
+  padding: 2px 4px;
+  border-radius: 3px;
+  cursor: pointer;
+}
+
 .annotation-squiggle {
   text-decoration: underline wavy #C6613F;
-  text-decoration-thickness: 2px;
-  text-underline-offset: 4px;
+  text-decoration-thickness: 2.5px;
+  text-underline-offset: 3px;
+  text-decoration-skip-ink: none; /* Continue under ALL letters including y, g, p, q, j */
   cursor: pointer;
+  display: inline !important;
 }
 
 .annotation-circle {
   position: relative;
   display: inline;
   cursor: pointer;
-  padding: 0 2px;
-  z-index: 0;
+  padding: 4px 6px;
+  z-index: 2; /* Higher than heart/squiggle to show on top */
+  isolation: isolate;
 }
 
 .annotation-circle::before {
   content: "";
   position: absolute;
-  top: -4px;
-  left: -4px;
-  right: -4px;
-  bottom: -4px;
-  border: 2px solid #E76F51;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border: 2.5px solid #E76F51;
   border-radius: 50% 48% 52% 49% / 48% 51% 49% 52%;
   pointer-events: none;
   transform: rotate(-2deg);
   z-index: -1;
+  background: transparent;
 }
 
 /* Editor font */

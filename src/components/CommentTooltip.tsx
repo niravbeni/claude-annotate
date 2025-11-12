@@ -66,11 +66,11 @@ export function CommentTooltip({
             </div>
           </div>
           {/* Arrow */}
-          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-px">
-            <div className="border-8 border-transparent border-t-white" />
-          </div>
           <div className="absolute top-full left-1/2 -translate-x-1/2">
             <div className="border-8 border-transparent border-t-gray-200" />
+          </div>
+          <div className="absolute top-full left-1/2 -translate-x-1/2 -mt-0.5">
+            <div className="border-8 border-transparent border-t-white" />
           </div>
         </div>
       )}

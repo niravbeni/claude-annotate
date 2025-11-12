@@ -8,11 +8,106 @@ import { useMemo, memo } from 'react';
 const AnnotatedTextComponent = () => {
   const { text, annotations, annotationsVisible, openBrowserModal } = useAppStore();
 
+  // DEBUG: Log all raw annotations from Claude
+  console.log('📊 ALL RAW ANNOTATIONS:', annotations.map(ann => ({
+    type: ann.type,
+    indices: { start: ann.startIndex, end: ann.endIndex },
+    annotatedText: ann.annotatedText,
+    actualText: text.slice(ann.startIndex, ann.endIndex),
+    match: text.slice(ann.startIndex, ann.endIndex) === ann.annotatedText,
+  })));
+
+  // Helper function to fix incorrect indices by finding the annotatedText in the actual text
+  const fixAnnotationIndices = (annotation: AnnotationType): AnnotationType => {
+    const { startIndex, endIndex, annotatedText } = annotation;
+    const actualText = text.slice(startIndex, endIndex);
+    
+    // If indices are correct, return as-is
+    if (actualText === annotatedText) {
+      return annotation;
+    }
+    
+    // Otherwise, search for the annotatedText in the full text
+    const correctStart = text.indexOf(annotatedText);
+    if (correctStart === -1) {
+      console.warn('⚠️ Could not find annotatedText in document:', annotatedText);
+      return annotation; // Return original if not found
+    }
+    
+    const correctedAnnotation = {
+      ...annotation,
+      startIndex: correctStart,
+      endIndex: correctStart + annotatedText.length,
+    };
+    
+    console.log('🔧 FIXED INDICES:', {
+      type: annotation.type,
+      annotatedText: annotatedText,
+      wrongIndices: { start: startIndex, end: endIndex },
+      wrongText: actualText,
+      correctIndices: { start: correctStart, end: correctStart + annotatedText.length },
+      correctText: text.slice(correctStart, correctStart + annotatedText.length),
+    });
+    
+    return correctedAnnotation;
+  };
+
   // Helper function to adjust annotation boundaries to complete sentences/phrases
   const adjustToWordBoundaries = (annotation: AnnotationType): AnnotationType => {
     let { startIndex, endIndex } = annotation;
     
-    // STEP 1: Extend BACKWARD to sentence start (capital letter after period or start of text)
+    // For CIRCLES, be ULTRA PRECISE - minimal adjustment only if cutting a word
+    if (annotation.type === 'circle') {
+      console.log('🔴 CIRCLE ANNOTATION:', {
+        type: annotation.type,
+        originalIndices: { start: startIndex, end: endIndex },
+        originalText: `"${text.slice(startIndex, endIndex)}"`,
+        annotatedText: `"${annotation.annotatedText}"`,
+        comment: annotation.comment,
+        // Show context around the annotation
+        before: `"${text.slice(Math.max(0, startIndex - 20), startIndex)}"`,
+        after: `"${text.slice(endIndex, Math.min(text.length, endIndex + 20))}"`,
+      });
+      // Only adjust if we're literally cutting a word in half
+      if (startIndex > 0 && 
+          /[a-zA-Z0-9]/.test(text[startIndex - 1]) && 
+          /[a-zA-Z0-9]/.test(text[startIndex])) {
+        // Move back to start of word (max 10 chars to avoid over-extension)
+        let steps = 0;
+        while (startIndex > 0 && /[a-zA-Z0-9]/.test(text[startIndex - 1]) && steps < 10) {
+          startIndex--;
+          steps++;
+        }
+      }
+      
+      if (endIndex < text.length && 
+          endIndex > 0 &&
+          /[a-zA-Z0-9]/.test(text[endIndex - 1]) && 
+          /[a-zA-Z0-9]/.test(text[endIndex])) {
+        // Move forward to end of word (max 10 chars)
+        let steps = 0;
+        while (endIndex < text.length && /[a-zA-Z0-9]/.test(text[endIndex]) && steps < 10) {
+          endIndex++;
+          steps++;
+        }
+      }
+      
+      // DO NOT extend circles beyond words - return immediately
+      const adjusted = {
+        ...annotation,
+        startIndex,
+        endIndex,
+      };
+      console.log('🔴 CIRCLE ADJUSTED:', {
+        adjustedIndices: { start: startIndex, end: endIndex },
+        adjustedText: `"${text.slice(startIndex, endIndex)}"`,
+        changed: annotation.startIndex !== startIndex || annotation.endIndex !== endIndex,
+      });
+      return adjusted;
+    }
+    
+    // For HEARTS and SQUIGGLES, extend to complete sentences
+    // STEP 1: Extend BACKWARD to sentence start
     let backwardSteps = 0;
     const maxBackward = 200;
     
@@ -85,58 +180,77 @@ const AnnotatedTextComponent = () => {
     };
   };
 
-  // Sort annotations by startIndex to process them in order
+  // Sort annotations by startIndex, but prioritize squiggles and circles over hearts
   const sortedAnnotations = useMemo(() => {
     return [...annotations]
-      .map(adjustToWordBoundaries)
-      .sort((a, b) => a.startIndex - b.startIndex);
+      .map(fixAnnotationIndices) // First, fix any incorrect indices from Claude
+      .map(adjustToWordBoundaries) // Then, adjust to word/sentence boundaries
+      .sort((a, b) => {
+        // First sort by position
+        if (a.startIndex !== b.startIndex) {
+          return a.startIndex - b.startIndex;
+        }
+        // If same position, prioritize: circle > squiggle > heart
+        const priority = { 'circle': 0, 'squiggle-correction': 1, 'squiggle-suggestion': 2, 'heart': 3 };
+        return (priority[a.type as keyof typeof priority] || 4) - (priority[b.type as keyof typeof priority] || 4);
+      });
   }, [annotations, text]);
 
-  // Build segments of text with annotations
+  // Build segments of text with annotations - allowing overlaps!
   const segments = useMemo(() => {
     if (sortedAnnotations.length === 0) {
       return [{ text, annotations: [] as AnnotationType[] }];
     }
 
-    // Filter out overlapping annotations - keep only the first one for each position
-    const nonOverlapping: AnnotationType[] = [];
-    let lastEnd = 0;
+    // Create a map of positions to annotations to handle overlaps
+    const positionMap = new Map<number, AnnotationType[]>();
     
+    // For each character position, track which annotations cover it
     sortedAnnotations.forEach((annotation) => {
-      // Only include if it doesn't overlap with the previous annotation
-      if (annotation.startIndex >= lastEnd) {
-        nonOverlapping.push(annotation);
-        lastEnd = annotation.endIndex;
+      for (let i = annotation.startIndex; i < annotation.endIndex; i++) {
+        if (!positionMap.has(i)) {
+          positionMap.set(i, []);
+        }
+        positionMap.get(i)!.push(annotation);
       }
     });
 
+    // Build segments by finding continuous ranges with the same annotation set
     const result: Array<{ text: string; annotations: AnnotationType[] }> = [];
     let currentIndex = 0;
-
-    nonOverlapping.forEach((annotation) => {
-      // Add text before this annotation
-      if (currentIndex < annotation.startIndex) {
-        result.push({
-          text: text.slice(currentIndex, annotation.startIndex),
-          annotations: [],
-        });
+    
+    while (currentIndex < text.length) {
+      const currentAnnotations = positionMap.get(currentIndex) || [];
+      
+      // Find the end of this segment (where annotation set changes)
+      let endIndex = currentIndex + 1;
+      while (endIndex < text.length) {
+        const nextAnnotations = positionMap.get(endIndex) || [];
+        // Check if annotation sets are identical
+        if (
+          currentAnnotations.length !== nextAnnotations.length ||
+          !currentAnnotations.every(a => nextAnnotations.includes(a))
+        ) {
+          break;
+        }
+        endIndex++;
       }
-
-      // Add annotated text
+      
+      // Add this segment
       result.push({
-        text: text.slice(annotation.startIndex, annotation.endIndex),
-        annotations: [annotation],
+        text: text.slice(currentIndex, endIndex),
+        annotations: currentAnnotations,
       });
+      
+      currentIndex = endIndex;
+    }
 
-      currentIndex = annotation.endIndex;
-    });
-
-    // Add remaining text after last annotation
-    if (currentIndex < text.length) {
-      result.push({
-        text: text.slice(currentIndex),
-        annotations: [],
-      });
+    // Debug: log segments with circles
+    const circleSegments = result.filter(seg => 
+      seg.annotations.some(ann => ann.type === 'circle')
+    );
+    if (circleSegments.length > 0) {
+      console.log('🔴 SEGMENTS WITH CIRCLES:', circleSegments);
     }
 
     return result;
@@ -175,27 +289,76 @@ const AnnotatedTextComponent = () => {
           );
         }
 
-        const annotation = segment.annotations[0];
-        // NEVER show reference for heart (validation) annotations
-        const hasReference = annotation.type !== 'heart' && annotation.browserReference !== null;
+        // Priority: circle > squiggle > heart (for tooltip reference)
+        const priority = { 'circle': 0, 'squiggle-correction': 1, 'squiggle-suggestion': 2, 'heart': 3 };
+        const primaryAnnotation = segment.annotations.sort((a, b) => 
+          (priority[a.type as keyof typeof priority] || 4) - (priority[b.type as keyof typeof priority] || 4)
+        )[0];
+        
+        // Check if this is the LAST segment for each heart annotation
+        // (to only show heart icon at the end)
+        const heartAnnotations = segment.annotations.filter(ann => ann.type === 'heart');
+        const isLastSegmentForHeart = heartAnnotations.some(heartAnn => {
+          // Find the last character of this heart annotation
+          const heartEndIndex = heartAnn.endIndex;
+          // Calculate this segment's end position in the original text
+          const segmentStartIndex = segments.slice(0, index).reduce((acc, seg) => acc + seg.text.length, 0);
+          const segmentEndIndex = segmentStartIndex + segment.text.length;
+          // This is the last segment if the segment end matches or exceeds the heart end
+          return segmentEndIndex >= heartEndIndex;
+        });
+        
+        // Build annotation classes, but use special class for hearts not at the end
+        const allAnnotationClasses = segment.annotations
+          .map(ann => {
+            if (ann.type === 'heart' && !isLastSegmentForHeart) {
+              // Use a special class that doesn't add the heart icon
+              return 'annotation-heart-body';
+            }
+            return getAnnotationClass(ann);
+          })
+          .filter(cls => cls !== 'annotation-hidden')
+          .join(' ');
+        
+        // Debug: log if this segment has a circle
+        if (segment.annotations.some(ann => ann.type === 'circle')) {
+          console.log('🔴 RENDERING CIRCLE SEGMENT:', {
+            text: segment.text,
+            annotations: segment.annotations.map(a => a.type),
+            classes: allAnnotationClasses,
+          });
+        }
+        
+        // Combine comments from all annotations for the tooltip
+        const combinedComment = segment.annotations
+          .map(ann => formatComment(ann.comment))
+          .join('<br/><br/>');
+        
+        // Show reference if ANY annotation (except heart) has one
+        const hasReference = segment.annotations.some(
+          ann => ann.type !== 'heart' && ann.browserReference !== null
+        );
+        const referenceAnnotation = segment.annotations.find(
+          ann => ann.type !== 'heart' && ann.browserReference !== null
+        );
 
         return (
           <CommentTooltip
             key={index}
-            content={formatComment(annotation.comment)}
-            certainty={annotation.certainty}
+            content={combinedComment}
+            certainty={primaryAnnotation.certainty}
             hasBrowserLink={hasReference}
             onBrowserLinkClick={
-              hasReference
-                ? () => openBrowserModal(annotation.browserReference!)
+              hasReference && referenceAnnotation
+                ? () => openBrowserModal(referenceAnnotation.browserReference!)
                 : undefined
             }
           >
             <span 
-              className={`${getAnnotationClass(annotation)} text-gray-900`}
+              className={`${allAnnotationClasses} text-gray-900`}
               style={{ display: 'inline' }}
               role="mark"
-              aria-label={`${annotation.type} annotation`}
+              aria-label={`${segment.annotations.map(a => a.type).join(', ')} annotation`}
             >
               {segment.text}
             </span>

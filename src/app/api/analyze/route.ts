@@ -24,6 +24,15 @@ export async function POST(request: NextRequest) {
     // Call Claude
     const annotations = await analyzeText(text);
 
+    // DEBUG: Log what Claude returned
+    console.log('🤖 CLAUDE RETURNED:', JSON.stringify(annotations.map(ann => ({
+      type: ann.type,
+      startIndex: ann.startIndex,
+      endIndex: ann.endIndex,
+      annotatedText: ann.annotatedText,
+      textLength: text.length,
+    })), null, 2));
+
     return NextResponse.json({ annotations });
   } catch (error: any) {
     console.error('Analysis error:', error);
