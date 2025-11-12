@@ -407,3 +407,19 @@
 [data-sonner-toast] [data-description] {
   font-size: 13px;
 }
+
+/* Uncertain comments - grey squiggly underline */
+.uncertain-comment {
+  text-decoration: underline wavy #6B7280;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 2px;
+  text-decoration-skip-ink: none;
+}
+
+/* Lighter bold text in tooltips and history cards */
+.uncertain-comment strong,
+.text-ui-body-small strong,
+.text-gray-800 strong {
+  color: #4B5563;
+  font-weight: 600;
+}

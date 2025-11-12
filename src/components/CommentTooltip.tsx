@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Info, Heart, Waves } from 'lucide-react';
+import { Info, Heart, Waves, CircleAlert } from 'lucide-react';
 import { CommentTooltipProps } from '@/types';
 
 const formatComment = (comment: string) => {
@@ -61,6 +61,8 @@ export function CommentTooltip({
                     {/* Icon on the left */}
                     {ann.type === 'heart' ? (
                       <Heart className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: '#C6613F', fill: '#C6613F', stroke: 'none' }} />
+                    ) : ann.type === 'circle' ? (
+                      <CircleAlert className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: 'white', fill: '#C6613F', stroke: 'white' }} />
                     ) : (
                       <Waves className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: '#C6613F', stroke: '#C6613F' }} />
                     )}
@@ -68,7 +70,7 @@ export function CommentTooltip({
                     {/* Comment content */}
                     <div className="flex-1">
                       <span
-                        className="inline"
+                        className={`inline ${ann.certainty === 'uncertain' ? 'uncertain-comment' : ''}`}
                         dangerouslySetInnerHTML={{
                           __html: formatComment(ann.comment),
                         }}
@@ -90,6 +92,7 @@ export function CommentTooltip({
                 // Old way: For backward compatibility
                 <div className="inline">
                   <span
+                    className={certainty === 'uncertain' ? 'uncertain-comment' : ''}
                     dangerouslySetInnerHTML={{
                       __html: content || '',
                     }}

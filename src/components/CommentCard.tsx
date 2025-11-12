@@ -18,7 +18,7 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
       case 'squiggle-suggestion':
         return <Waves className="h-4 w-4" style={{ color: '#C6613F' }} />;
       case 'circle':
-        return <CircleAlert className="h-4 w-4 text-red-500" />;
+        return <CircleAlert className="h-4 w-4" style={{ color: 'white', fill: '#C6613F', stroke: 'white' }} />;
     }
   };
 
@@ -67,12 +67,11 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
 
       {/* Comment Body */}
       <div
-        className="text-ui-body-small text-gray-800 leading-relaxed"
+        className={`text-ui-body-small text-gray-800 leading-relaxed ${
+          annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
+        }`}
         dangerouslySetInnerHTML={{
-          __html:
-            annotation.certainty === 'uncertain'
-              ? `≈ ${formatComment(annotation.comment)}`
-              : formatComment(annotation.comment),
+          __html: formatComment(annotation.comment),
         }}
       />
 
