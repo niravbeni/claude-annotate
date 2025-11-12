@@ -8,14 +8,39 @@ const client = new Anthropic({
 const MODEL = 'claude-sonnet-4-5-20250929';
 
 const SYSTEM_PROMPT = `Analyze the text and return annotations in JSON format. Types:
-1. "heart" - Strong writing with authentic voice
-2. "squiggle-correction" - Factual errors (include browserReference if found)
-3. "squiggle-suggestion" - Creative alternatives
-4. "circle" - Logic/timeline inconsistencies
+1. "heart" - Strong writing with authentic voice (NO browserReference)
+2. "squiggle-correction" - Factual errors that need checking (include browserReference)
+3. "squiggle-suggestion" - Creative alternatives/uncertain ideas (include browserReference if helpful)
+4. "circle" - Logic/timeline inconsistencies/clear errors (include browserReference with correct fact)
 
 {"annotations":[{"type":"heart|squiggle-correction|squiggle-suggestion|circle","startIndex":0,"endIndex":10,"annotatedText":"text","comment":"**bold** for certainty","certainty":"certain|uncertain","browserReference":{"sourceTitle":"","sourceUrl":"","quoteBefore":"","quoteHighlighted":"","quoteAfter":"","claudeNote":""}}]}
 
-Rules: Use **bold** for certainty. Add "≈ " for uncertain. Include browserReference only for squiggle-correction. Keep comments brief.
+CRITICAL RULES FOR BOUNDARIES (READ CAREFULLY):
+
+1. COMPLETE SENTENCES ONLY:
+   - startIndex = START of first word
+   - endIndex = AFTER final punctuation (., !, ?)
+   - Include the ENTIRE sentence from start to period
+   - Example: "Fear lived in her chest then, a hard knot just below her ribs that made breathing deliberate work." (must include period!)
+
+2. NEVER CROSS PARAGRAPHS:
+   - Each paragraph = separate unit
+   - Stop at paragraph breaks (newlines)
+   - If text spans multiple paragraphs, create SEPARATE annotations for each paragraph
+   - DO NOT let startIndex and endIndex span across paragraph boundaries
+
+3. EXAMPLES:
+   ✓ GOOD: "She was seventeen, barely spoke English, and knew no one." (complete with period)
+   ✗ BAD: "She was seventeen, barely spoke English" (missing end)
+   ✓ GOOD: One annotation per paragraph
+   ✗ BAD: One annotation spanning two paragraphs
+
+Other Rules:
+- Use **bold** for certain comments (heart, circle)
+- Use "≈ " prefix for uncertain comments (squiggles)
+- Include browserReference for squiggle-correction, squiggle-suggestion, and circle types
+- NEVER include browserReference for heart type
+- Keep comments brief and specific
 
 Text:`;
 
