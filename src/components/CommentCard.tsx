@@ -1,20 +1,22 @@
 'use client';
 
-import { formatDistanceToNow } from 'date-fns';
-import { Heart, CircleAlert, Waves } from 'lucide-react';
+import { format } from 'date-fns';
+import { Heart, CircleAlert, Waves, X, Star } from 'lucide-react';
 import { CommentCardProps } from '@/types';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
 import { memo } from 'react';
+import { useAppStore } from '@/lib/store';
 
 const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps) => {
+  const { deleteAnnotationFromHistory, toggleBookmarkAnnotation } = useAppStore();
   const getIcon = () => {
     switch (annotation.type) {
       case 'heart':
-        return <Heart className="h-4 w-4 text-orange-500 fill-orange-500" />;
+        return <Heart className="h-4 w-4" style={{ color: '#C6613F', fill: '#C6613F', stroke: 'none' }} />;
       case 'squiggle-correction':
       case 'squiggle-suggestion':
-        return <Waves className="h-4 w-4 text-amber-500" />;
+        return <Waves className="h-4 w-4" style={{ color: '#C6613F' }} />;
       case 'circle':
         return <CircleAlert className="h-4 w-4 text-red-500" />;
     }
@@ -23,11 +25,10 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
   const getTypeLabel = () => {
     switch (annotation.type) {
       case 'heart':
-        return 'Validation';
+        return 'Authenticity';
       case 'squiggle-correction':
-        return 'Fact Check';
       case 'squiggle-suggestion':
-        return 'Suggestion';
+        return 'Uncertainty';
       case 'circle':
         return 'Discrepancy';
     }
@@ -54,9 +55,7 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
           </span>
         </div>
         <span className="text-ui-body-extra-small text-gray-400">
-          {formatDistanceToNow(new Date(annotation.timestamp), {
-            addSuffix: true,
-          })}
+          {format(new Date(annotation.timestamp), 'HH:mm')}
         </span>
       </div>
 
@@ -77,17 +76,46 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
         }}
       />
 
-      {/* Reference Button */}
-      {annotation.browserReference && onReferenceClick && (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => onReferenceClick(annotation.browserReference!)}
-          className="mt-3 w-full text-ui-body-small-bold"
-        >
-          View Reference
-        </Button>
-      )}
+      {/* Action Buttons Row - Reference Button + Star + Cross */}
+      <div className="flex items-center justify-between gap-2 mt-3">
+        {/* Reference Button - Left side, only if exists */}
+        {annotation.browserReference && onReferenceClick ? (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onReferenceClick(annotation.browserReference!)}
+            className="text-ui-body-small-bold cursor-pointer"
+          >
+            View Reference
+          </Button>
+        ) : (
+          <div></div>
+        )}
+
+        {/* Star + Cross - Right side */}
+        <div className="flex items-center gap-2">
+          {/* Star/Bookmark Button */}
+          <button
+            onClick={() => toggleBookmarkAnnotation(annotation.id)}
+            className="transition-colors cursor-pointer"
+            aria-label={annotation.bookmarked ? 'Remove bookmark' : 'Bookmark'}
+          >
+            <Star
+              className={`h-4 w-4 ${
+                annotation.bookmarked ? 'fill-[#C6613F] text-[#C6613F]' : 'text-gray-400'
+              }`}
+            />
+          </button>
+          {/* Delete Button */}
+          <button
+            onClick={() => deleteAnnotationFromHistory(annotation.id)}
+            className="transition-colors cursor-pointer"
+            aria-label="Delete annotation"
+          >
+            <X className="h-4 w-4 text-gray-400" />
+          </button>
+        </div>
+      </div>
     </motion.div>
   );
 };

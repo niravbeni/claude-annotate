@@ -1,14 +1,20 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Info } from 'lucide-react';
+import { Info, Heart, Waves } from 'lucide-react';
 import { CommentTooltipProps } from '@/types';
+
+const formatComment = (comment: string) => {
+  return comment.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+};
 
 export function CommentTooltip({
   content,
   certainty,
   hasBrowserLink,
   onBrowserLinkClick,
+  annotations,
+  onReferenceClick,
   children,
 }: CommentTooltipProps) {
   const [isVisible, setIsVisible] = useState(false);
@@ -47,21 +53,58 @@ export function CommentTooltip({
           onMouseLeave={() => setIsVisible(false)}
         >
           <div className="bg-white rounded-lg shadow-2xl border border-gray-200 p-4 w-80 max-w-xs cursor-pointer">
-            <div className="text-ui-body-small leading-relaxed text-gray-800 inline">
-              <span
-                dangerouslySetInnerHTML={{
-                  __html: certainty === 'uncertain' ? `≈ ${content}` : content,
-                }}
-              />
-              {hasBrowserLink && onBrowserLinkClick && (
-                <button
-                  onClick={onBrowserLinkClick}
-                  className="inline-flex items-center justify-center ml-2 w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] text-white transition-colors align-middle cursor-pointer"
-                  aria-label="View reference"
-                  title="View reference"
-                >
-                  <Info className="h-3 w-3" />
-                </button>
+            <div className="text-ui-body-small leading-relaxed text-gray-800">
+              {annotations && annotations.length > 0 ? (
+                // New way: Show each annotation with its own inline reference button
+                annotations.map((ann, idx) => (
+                  <div key={idx} className={`flex items-start gap-2 ${idx > 0 ? 'mt-3' : ''}`}>
+                    {/* Icon on the left */}
+                    {ann.type === 'heart' ? (
+                      <Heart className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: '#C6613F', fill: '#C6613F', stroke: 'none' }} />
+                    ) : (
+                      <Waves className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: '#C6613F', stroke: '#C6613F' }} />
+                    )}
+                    
+                    {/* Comment content */}
+                    <div className="flex-1">
+                      <span
+                        className="inline"
+                        dangerouslySetInnerHTML={{
+                          __html: formatComment(ann.comment),
+                        }}
+                      />
+                      {ann.type !== 'heart' && ann.browserReference && onReferenceClick && (
+                        <button
+                          onClick={() => onReferenceClick(ann.browserReference!)}
+                          className="inline-flex items-center justify-center ml-2 w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors align-middle cursor-pointer"
+                          aria-label="View reference"
+                          title="View reference"
+                        >
+                          <Info className="h-3 w-3" strokeWidth={2.5} style={{ color: 'white', stroke: 'white', fill: 'none' }} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                // Old way: For backward compatibility
+                <div className="inline">
+                  <span
+                    dangerouslySetInnerHTML={{
+                      __html: content || '',
+                    }}
+                  />
+                  {hasBrowserLink && onBrowserLinkClick && (
+                    <button
+                      onClick={onBrowserLinkClick}
+                      className="inline-flex items-center justify-center ml-2 w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors align-middle cursor-pointer"
+                      aria-label="View reference"
+                      title="View reference"
+                    >
+                      <Info className="h-3 w-3" strokeWidth={2.5} style={{ color: 'white', stroke: 'white', fill: 'none' }} />
+                    </button>
+                  )}
+                </div>
               )}
             </div>
           </div>

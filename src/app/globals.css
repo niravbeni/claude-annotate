@@ -145,7 +145,7 @@
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23C6613F' stroke='none'%3E%3Cpath d='M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z'/%3E%3C/svg%3E");
   background-size: contain;
   background-repeat: no-repeat;
-  transform: rotate(8deg) translateY(-2px);
+  transform: rotate(8deg) translateY(1px);
   pointer-events: none;
 }
 
@@ -191,6 +191,18 @@
   background: transparent;
 }
 
+/* Remove pointer cursor on annotations when in non-interactive overlay (edit mode) */
+.pointer-events-none .annotation-heart,
+.pointer-events-none .annotation-heart-body,
+.pointer-events-none .annotation-squiggle,
+.pointer-events-none .annotation-circle {
+  cursor: text !important;
+}
+
+.pointer-events-none * {
+  cursor: text !important;
+}
+
 /* Editor font - Anthropic Serif for Claude Response text */
 .editor-text {
   font-family: var(--font-serif);
@@ -202,22 +214,6 @@
 
 .editor-text * {
   color: #1a1a1a !important;
-}
-
-/* Transparent textarea with visible caret */
-textarea.text-transparent {
-  color: transparent !important;
-  -webkit-text-fill-color: transparent;
-}
-
-textarea.text-transparent::selection {
-  background-color: rgba(198, 97, 63, 0.3);
-  color: transparent;
-}
-
-textarea.text-transparent::-moz-selection {
-  background-color: rgba(198, 97, 63, 0.3);
-  color: transparent;
 }
 
 /* Smooth transitions for annotations */

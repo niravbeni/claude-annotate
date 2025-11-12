@@ -5,7 +5,11 @@ import { Annotation as AnnotationType } from '@/types';
 import { CommentTooltip } from './CommentTooltip';
 import { useMemo, memo } from 'react';
 
-const AnnotatedTextComponent = () => {
+interface AnnotatedTextProps {
+  showTooltips?: boolean;
+}
+
+const AnnotatedTextComponent = ({ showTooltips = true }: AnnotatedTextProps) => {
   const { text, annotations, annotationsVisible, openBrowserModal } = useAppStore();
 
   // DEBUG: Log all raw annotations from Claude
@@ -368,39 +372,49 @@ const AnnotatedTextComponent = () => {
           });
         }
         
-        // Combine comments from all annotations for the tooltip
-        const combinedComment = segment.annotations
+        // Sort annotations: hearts first, then others
+        const sortedAnnotations = [...segment.annotations].sort((a, b) => {
+          if (a.type === 'heart' && b.type !== 'heart') return -1;
+          if (a.type !== 'heart' && b.type === 'heart') return 1;
+          return 0;
+        });
+        
+        // For now, show reference only if there's a non-heart annotation with one
+        // The tooltip will be restructured to show inline references per comment
+        const hasReference = sortedAnnotations.some(
+          ann => ann.type !== 'heart' && ann.browserReference !== null
+        );
+        const referenceAnnotation = sortedAnnotations.find(
+          ann => ann.type !== 'heart' && ann.browserReference !== null
+        );
+        
+        // Combine comments (sorted: hearts first)
+        const combinedComment = sortedAnnotations
           .map(ann => formatComment(ann.comment))
           .join('<br/><br/>');
-        
-        // Show reference if ANY annotation (except heart) has one
-        const hasReference = segment.annotations.some(
-          ann => ann.type !== 'heart' && ann.browserReference !== null
+
+        const annotatedSpan = (
+          <span 
+            className={`${allAnnotationClasses} text-gray-900`}
+            style={{ display: 'inline' }}
+            role="mark"
+            aria-label={`${segment.annotations.map(a => a.type).join(', ')} annotation`}
+          >
+            {segment.text}
+          </span>
         );
-        const referenceAnnotation = segment.annotations.find(
-          ann => ann.type !== 'heart' && ann.browserReference !== null
-        );
+
+        if (!showTooltips) {
+          return <span key={index}>{annotatedSpan}</span>;
+        }
 
         return (
           <CommentTooltip
             key={index}
-            content={combinedComment}
-            certainty={primaryAnnotation.certainty}
-            hasBrowserLink={hasReference}
-            onBrowserLinkClick={
-              hasReference && referenceAnnotation
-                ? () => openBrowserModal(referenceAnnotation.browserReference!)
-                : undefined
-            }
+            annotations={sortedAnnotations}
+            onReferenceClick={openBrowserModal}
           >
-            <span 
-              className={`${allAnnotationClasses} text-gray-900`}
-              style={{ display: 'inline' }}
-              role="mark"
-              aria-label={`${segment.annotations.map(a => a.type).join(', ')} annotation`}
-            >
-              {segment.text}
-            </span>
+            {annotatedSpan}
           </CommentTooltip>
         );
       })}

@@ -18,6 +18,7 @@ export interface Annotation {
   certainty: 'certain' | 'uncertain';
   browserReference: BrowserReference | null;
   timestamp: Date; // Generated client-side
+  bookmarked?: boolean; // Optional bookmark flag
 }
 
 // Zustand store shape
@@ -47,6 +48,9 @@ export interface AppState {
   closeBrowserModal: () => void;
   toggleBrowserFullscreen: () => void;
   resetToDefault: () => void;
+  deleteAnnotationFromHistory: (id: string) => void;
+  toggleBookmarkAnnotation: (id: string) => void;
+  clearHistory: () => void;
 }
 
 // Component props interfaces
@@ -57,10 +61,12 @@ export interface AnnotationProps {
 }
 
 export interface CommentTooltipProps {
-  content: string;
-  certainty: 'certain' | 'uncertain';
-  hasBrowserLink: boolean;
+  content?: string;
+  certainty?: 'certain' | 'uncertain';
+  hasBrowserLink?: boolean;
   onBrowserLinkClick?: () => void;
+  annotations?: Annotation[];
+  onReferenceClick?: (reference: BrowserReference) => void;
   children: React.ReactNode;
 }
 

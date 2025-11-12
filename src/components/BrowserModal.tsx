@@ -126,7 +126,7 @@ export function BrowserModal({
               <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <p className="text-claude-body text-gray-700 whitespace-pre-wrap">
                   {reference.quoteBefore}
-                  <mark className="bg-orange-200 px-1 py-0.5 rounded">
+                  <mark className="px-1 py-0.5 rounded" style={{ backgroundColor: 'rgba(198, 97, 63, 0.2)' }}>
                     {reference.quoteHighlighted}
                   </mark>
                   {reference.quoteAfter}

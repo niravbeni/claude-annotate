@@ -5,19 +5,67 @@ import { AnalyzeButton } from './AnalyzeButton';
 import { AnnotatedText } from './AnnotatedText';
 import { LIMITS } from '@/lib/constants';
 import { toast } from 'sonner';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 
 export function TextEditor() {
   const {
     text,
     setText,
     isAnalyzing,
+    isEditing,
     annotations,
     startAnalysis,
     finishAnalysis,
+    commentHistory,
   } = useAppStore();
+  
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const editableRef = useRef<HTMLDivElement>(null);
+  const textOnEditStart = useRef<string>('');
+  const annotationsBeforeEdit = useRef<typeof annotations>([]);
+  
+  const setEditing = (editing: boolean) => {
+    if (editing) {
+      // When entering edit mode, save current state
+      textOnEditStart.current = text;
+      annotationsBeforeEdit.current = annotations;
+      
+      useAppStore.setState({ 
+        isEditing: true,
+        annotations: [] // Clear from view, but they're already in commentHistory
+      });
+    } else {
+      // When exiting edit mode, check if text changed
+      const textChanged = text !== textOnEditStart.current;
+      
+      if (!textChanged && annotationsBeforeEdit.current.length > 0) {
+        // No changes made - restore previous annotations
+        useAppStore.setState({ 
+          isEditing: false,
+          annotations: annotationsBeforeEdit.current 
+        });
+      } else {
+        // Text changed or no previous annotations - stay in edit mode for new analysis
+        useAppStore.setState({ isEditing: false });
+      }
+    }
+  };
 
   const handleAnalyze = async () => {
+    // Check if we're in edit mode and text hasn't changed
+    if (isEditing) {
+      const textChanged = text !== textOnEditStart.current;
+      
+      if (!textChanged && annotationsBeforeEdit.current.length > 0) {
+        // No changes made - just restore previous annotations and exit edit mode
+        useAppStore.setState({ 
+          isEditing: false,
+          annotations: annotationsBeforeEdit.current 
+        });
+        return;
+      }
+    }
+
     if (!text.trim()) {
       toast.error('Please enter some text to analyze');
       return;
@@ -30,7 +78,6 @@ export function TextEditor() {
 
     try {
       startAnalysis();
-      toast.loading('Analyzing your text with Claude AI...', { id: 'analysis' });
 
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 second timeout
@@ -53,13 +100,12 @@ export function TextEditor() {
       }
 
       finishAnalysis(data.annotations);
-      toast.success(`Found ${data.annotations.length} annotations!`, { id: 'analysis' });
     } catch (error: any) {
       console.error('Analysis error:', error);
       if (error.name === 'AbortError') {
-        toast.error('Analysis timed out. Please try with shorter text.', { id: 'analysis' });
+        toast.error('Analysis timed out. Please try with shorter text.');
       } else {
-        toast.error(error.message || 'Failed to analyze text', { id: 'analysis' });
+        toast.error(error.message || 'Failed to analyze text');
       }
       finishAnalysis([]);
     }
@@ -78,61 +124,94 @@ export function TextEditor() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [text, isAnalyzing]);
 
+  const showAnnotations = annotations.length > 0 && !isEditing;
   const hasAnnotations = annotations.length > 0;
 
   return (
     <div className="relative h-full flex flex-col">
-      {/* Status Header */}
-      {hasAnnotations && (
-        <div className="sticky top-0 z-10 bg-white border-b px-8 py-3">
-          <div className="text-ui-body-small-bold text-green-600">
-            {annotations.length} annotation{annotations.length !== 1 ? 's' : ''} active
-          </div>
-        </div>
-      )}
+      {/* Removed top status bar - moved to bottom */}
 
-      {/* Text Content - Always Editable with Annotation Overlay */}
-      <div className="flex-1 px-8 py-6">
+      {/* Text Content */}
+      <div className="flex-1 px-8 py-6" style={{ backgroundColor: '#FAF9F5' }}>
         <div className="relative">
-          <div className="relative w-full min-h-[600px] border rounded-lg bg-white focus-within:ring-2 focus-within:ring-[#C6613F]">
-            {/* Editable textarea - always on bottom layer */}
-            <textarea
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-              className={`absolute inset-0 w-full h-full p-4 pb-16 editor-text resize-none bg-transparent z-10 ${
-                hasAnnotations ? 'text-transparent caret-gray-900' : 'text-gray-900'
-              }`}
-              style={{
-                caretColor: hasAnnotations ? '#1a1a1a' : undefined,
-              }}
-              placeholder="Paste your text here..."
-              disabled={isAnalyzing}
-            />
-            
-            {/* Annotation overlay - shows on top when annotations exist */}
-            {hasAnnotations && (
-              <div className="absolute inset-0 w-full h-full p-4 pb-16 pointer-events-none z-20 overflow-auto">
-                <div className="pointer-events-auto">
-                  <AnnotatedText />
+          {showAnnotations ? (
+            <>
+              {/* Annotated Text inside textbox outline */}
+              <div className="w-full min-h-[600px] p-4 pb-16 border rounded-lg bg-white overflow-auto relative">
+                <AnnotatedText />
+                
+                {/* Annotation Count - bottom center */}
+                <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 text-ui-body-small text-gray-500">
+                  {annotations.length} annotation{annotations.length !== 1 ? 's' : ''} active
                 </div>
               </div>
-            )}
-          </div>
-          
-          {/* Analyze Button - Always visible at bottom right */}
-          <div className="absolute bottom-3 right-3 z-30">
-            <AnalyzeButton
-              isAnalyzing={isAnalyzing}
-              isDisabled={text.length > LIMITS.maxCharacters || !text.trim()}
-              onClick={handleAnalyze}
-            />
-          </div>
+              {/* Action Buttons - positioned at bottom right */}
+              <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
+                {/* Copy Button */}
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(text);
+                  }}
+                  className="rounded-full p-2.5 transition-all cursor-pointer hover:bg-gray-50 active:scale-95 bg-white"
+                  aria-label="Copy to clipboard"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+                {/* Edit Button */}
+                <button
+                  onClick={() => setEditing(true)}
+                  className="rounded-full p-2.5 transition-all cursor-pointer shadow-md hover:shadow-lg hover:opacity-90 active:scale-95 bg-black"
+                  aria-label="Edit text"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                  </svg>
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              {/* Edit mode - clean textarea for editing */}
+              <textarea
+                ref={textareaRef}
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                className="w-full min-h-[600px] p-4 pb-16 editor-text border rounded-lg bg-white resize-none focus:outline-none focus:ring-2 focus:ring-[#C6613F]"
+                style={{
+                  cursor: 'text',
+                }}
+                placeholder="Paste your text here..."
+                disabled={isAnalyzing}
+              />
+              
+              {/* Action Buttons - positioned at bottom right */}
+              <div className="absolute bottom-3 right-3 z-20 flex items-center gap-2">
+                {/* Copy Button */}
+                <button
+                  onClick={() => {
+                    navigator.clipboard.writeText(text);
+                  }}
+                  className="rounded-full p-2.5 transition-all cursor-pointer hover:bg-gray-50 active:scale-95 bg-white"
+                  aria-label="Copy to clipboard"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+                {/* Send Button */}
+                <AnalyzeButton
+                  isAnalyzing={isAnalyzing}
+                  isDisabled={text.length > LIMITS.maxCharacters || !text.trim()}
+                  onClick={handleAnalyze}
+                />
+              </div>
 
-          {/* Analyzing Overlay */}
-          {isAnalyzing && (
-            <div className="absolute inset-0 bg-gray-100 bg-opacity-60 flex items-center justify-center rounded-lg pointer-events-none z-40">
-              <div className="text-ui-body text-gray-600">Analyzing...</div>
-            </div>
+            </>
           )}
         </div>
       </div>

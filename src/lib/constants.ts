@@ -4,8 +4,8 @@ export { DEFAULT_TEXT } from './defaultText';
 
 // Design tokens
 export const COLORS = {
-  heart: '#FF8C42',
-  squiggle: '#E9C46A',
+  heart: '#C6613F',
+  squiggle: '#C6613F',
   circle: '#E76F51',
   background: '#FFFFFF',
   text: '#1A1A1A',

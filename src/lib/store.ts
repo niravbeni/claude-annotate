@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { AppState, Annotation, BrowserReference } from '@/types';
 import { DEFAULT_TEXT } from './constants';
-import { toast } from 'sonner';
 
 export const useAppStore = create<AppState>((set) => ({
   // Initial state
@@ -50,7 +49,6 @@ export const useAppStore = create<AppState>((set) => ({
       const removedCount = state.annotations.length - validAnnotations.length;
       if (removedCount > 0) {
         console.log(`📝 ${removedCount} annotation(s) removed due to text edit (still in history)`);
-        toast.info(`${removedCount} annotation(s) removed from view (saved in history)`);
       }
       
       return {
@@ -67,15 +65,27 @@ export const useAppStore = create<AppState>((set) => ({
     }),
 
   finishAnalysis: (annotations) =>
-    set((state) => ({
-      isAnalyzing: false,
-      isEditing: false,
-      annotations,
-      commentHistory: [
-        ...annotations.map((a) => ({ ...a, timestamp: new Date() })),
-        ...state.commentHistory,
-      ],
-    })),
+    set((state) => {
+      // Only add annotations that aren't already in history based on content
+      // Create a key for each annotation based on its content
+      const getAnnotationKey = (ann: Annotation) => 
+        `${ann.type}|${ann.annotatedText}|${ann.comment}|${ann.startIndex}|${ann.endIndex}`;
+      
+      const existingKeys = new Set(state.commentHistory.map(getAnnotationKey));
+      const newAnnotations = annotations
+        .filter(a => !existingKeys.has(getAnnotationKey(a)))
+        .map((a) => ({ ...a, timestamp: new Date() }));
+      
+      return {
+        isAnalyzing: false,
+        isEditing: false,
+        annotations,
+        commentHistory: [
+          ...newAnnotations,
+          ...state.commentHistory,
+        ],
+      };
+    }),
 
   toggleAnnotations: () =>
     set((state) => ({
@@ -106,6 +116,23 @@ export const useAppStore = create<AppState>((set) => ({
       commentHistory: [],
       isEditing: false,
       isAnalyzing: false,
+    }),
+
+  deleteAnnotationFromHistory: (id) =>
+    set((state) => ({
+      commentHistory: state.commentHistory.filter((ann) => ann.id !== id),
+    })),
+
+  toggleBookmarkAnnotation: (id) =>
+    set((state) => ({
+      commentHistory: state.commentHistory.map((ann) =>
+        ann.id === id ? { ...ann, bookmarked: !ann.bookmarked } : ann
+      ),
+    })),
+
+  clearHistory: () =>
+    set({
+      commentHistory: [],
     }),
 }));
 
