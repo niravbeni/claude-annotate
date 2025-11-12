@@ -204,6 +204,22 @@
   color: #1a1a1a !important;
 }
 
+/* Transparent textarea with visible caret */
+textarea.text-transparent {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent;
+}
+
+textarea.text-transparent::selection {
+  background-color: rgba(198, 97, 63, 0.3);
+  color: transparent;
+}
+
+textarea.text-transparent::-moz-selection {
+  background-color: rgba(198, 97, 63, 0.3);
+  color: transparent;
+}
+
 /* Smooth transitions for annotations */
 .annotation-transition {
   transition: opacity 200ms ease-in-out;

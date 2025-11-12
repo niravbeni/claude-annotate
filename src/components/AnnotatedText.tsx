@@ -314,8 +314,8 @@ const AnnotatedTextComponent = () => {
 
   return (
     <div 
-      className="editor-text p-4 leading-loose text-gray-900" 
-      style={{ paddingLeft: '40px', whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
+      className="editor-text leading-loose text-gray-900" 
+      style={{ whiteSpace: 'pre-wrap', wordWrap: 'break-word' }}
       role="article"
       aria-label="Annotated text with writing feedback"
     >
