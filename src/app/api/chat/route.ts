@@ -46,17 +46,17 @@ ${context.edits.length > 0 ? `RECENT EDITS:\nThe writer has made ${context.edits
 
 INSTRUCTIONS:
 - Answer the writer's questions about this specific annotation
-- Be EXTREMELY concise - aim for 1-2 sentences, 3 max
-- Keep responses short, direct, and conversational
-- No lengthy explanations or multiple paragraphs
-- Get straight to the point
+- Be EXTREMELY brief - 1 sentence only, 2 sentences maximum
+- Keep responses very short and direct
+- No explanations unless specifically asked
+- Get straight to the point with minimal words
 
 Writer's question: ${message}`;
 
     // Call Claude API
     const response = await client.messages.create({
       model: MODEL,
-      max_tokens: 200,
+      max_tokens: 100,
       temperature: 0.7,
       messages: [
         ...conversationHistory,

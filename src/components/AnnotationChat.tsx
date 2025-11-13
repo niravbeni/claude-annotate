@@ -123,18 +123,14 @@ export function AnnotationChat() {
     <div className="h-full flex flex-col">
       {/* Header with New Chat button */}
       {messages.length > 0 && (
-        <div className="border-b border-gray-200 px-4 py-3 flex items-center justify-end">
+        <div className="border-b border-gray-200 px-4 py-2 flex items-center justify-end">
           <button
-            onClick={() => {
-              if (confirm('Clear chat history for this annotation?')) {
-                clearAnnotationChat(activeAnnotation.id);
-              }
-            }}
-            className="flex items-center gap-2 px-3 py-1.5 text-ui-body-small text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-all cursor-pointer"
+            onClick={() => clearAnnotationChat(activeAnnotation.id)}
+            className="flex items-center gap-1.5 px-2 py-1 text-ui-body-extra-small text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-md transition-all cursor-pointer"
             aria-label="Clear chat"
           >
-            <RotateCcw className="h-4 w-4" />
-            New Chat
+            <RotateCcw className="h-3 w-3" />
+            Clear Chat
           </button>
         </div>
       )}
@@ -158,28 +154,48 @@ export function AnnotationChat() {
       </div>
 
       {/* Input area */}
-      <div className="border-t border-gray-200 p-4">
-        <div className="flex items-end gap-2">
+      <div className="p-4">
+        <div className="relative bg-white rounded-lg" style={{ 
+          boxShadow: '0px 2px 8px rgba(0, 0, 0, 0.08)'
+        }}>
           <textarea
             ref={textareaRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Type your message... (Enter to send)"
+            placeholder="Reply to Claude..."
             disabled={isSending}
-            className="flex-1 resize-none max-h-32 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#C6613F] text-ui-body-small disabled:opacity-50"
+            className="w-full resize-none px-3 py-2 pr-11 bg-transparent border-none rounded-lg focus:outline-none text-ui-body-small disabled:opacity-50"
             rows={1}
+            style={{ minHeight: '36px', maxHeight: '64px' }}
           />
           <button
             onClick={handleSend}
             disabled={!inputValue.trim() || isSending}
-            className="p-3 min-w-[48px] min-h-[48px] rounded-lg bg-[#C6613F] text-white hover:bg-[#B35635] active:bg-[#A34F2F] active:scale-[0.95] transition-all disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-sm"
+            className="absolute right-1.5 bottom-1.5 flex items-center justify-center rounded-lg transition-all hover:opacity-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+            style={{
+              width: '32px',
+              height: '32px',
+              backgroundColor: '#C6613F',
+              border: '0.5px solid rgba(31, 30, 29, 0.15)',
+              boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)'
+            }}
             aria-label="Send message"
           >
             {isSending ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
+              <Loader2 className="h-4 w-4 text-white animate-spin" />
             ) : (
-              <Send className="h-5 w-5" />
+              <svg 
+                width="20" 
+                height="20" 
+                viewBox="0 0 24 24" 
+                fill="none" 
+                xmlns="http://www.w3.org/2000/svg"
+                className="h-5 w-5"
+              >
+                <line x1="12" y1="18" x2="12" y2="7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                <polyline points="7 12 12 7 17 12" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+              </svg>
             )}
           </button>
         </div>

@@ -16,11 +16,11 @@ const ChatMessageComponent = ({ message }: ChatMessageProps) => {
       <div className={`max-w-[85%] ${isUser ? 'order-2' : 'order-1'}`}>
         {/* Message bubble */}
         <div
-          className={`rounded-lg px-4 py-3 ${
+          className={
             isUser
-              ? 'bg-[#C6613F] text-white'
-              : 'bg-gray-100 text-gray-900'
-          }`}
+              ? 'rounded-lg px-4 py-3 bg-[#F0EEE6] text-gray-900'
+              : 'text-gray-900'
+          }
         >
           <p className="text-ui-body-small whitespace-pre-wrap">{message.content}</p>
         </div>
