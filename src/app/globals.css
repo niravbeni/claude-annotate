@@ -160,7 +160,7 @@
 
 .annotation-squiggle {
   text-decoration: underline wavy #C6613F;
-  text-decoration-thickness: 2.5px;
+  text-decoration-thickness: 1.5px;
   text-underline-offset: 3px;
   text-decoration-skip-ink: none; /* Continue under ALL letters including y, g, p, q, j */
   cursor: pointer;
@@ -210,6 +210,7 @@
   line-height: 1.6;
   font-weight: 400;
   color: #1a1a1a !important;
+  overflow: hidden; /* Hide scrollbar */
 }
 
 .editor-text * {
@@ -419,7 +420,10 @@
 /* Lighter bold text in tooltips and history cards */
 .uncertain-comment strong,
 .text-ui-body-small strong,
-.text-gray-800 strong {
-  color: #4B5563;
+.text-gray-800 strong,
+div.text-ui-body-small strong,
+div.text-gray-800 strong,
+span strong {
+  color: #374151 !important;
   font-weight: 600;
 }

@@ -47,7 +47,7 @@ export function CommentTooltip({
           style={{
             top: `${position.top}px`,
             left: `${position.left}px`,
-            transform: 'translate(-50%, calc(-100% - 12px))',
+            transform: 'translate(-50%, calc(-100% - 20px))',
           }}
           onMouseEnter={() => setIsVisible(true)}
           onMouseLeave={() => setIsVisible(false)}

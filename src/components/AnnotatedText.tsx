@@ -10,7 +10,7 @@ interface AnnotatedTextProps {
 }
 
 const AnnotatedTextComponent = ({ showTooltips = true }: AnnotatedTextProps) => {
-  const { text, annotations, annotationsVisible, openBrowserModal } = useAppStore();
+  const { text, annotations, annotationsVisible, openBrowserModal, setActiveAnnotation, setPinnedAnnotation } = useAppStore();
 
   // DEBUG: Log all raw annotations from Claude
   console.log('📊 ALL RAW ANNOTATIONS:', annotations.map(ann => ({
@@ -399,6 +399,45 @@ const AnnotatedTextComponent = ({ showTooltips = true }: AnnotatedTextProps) => 
             style={{ display: 'inline' }}
             role="mark"
             aria-label={`${segment.annotations.map(a => a.type).join(', ')} annotation`}
+            onMouseEnter={() => {
+              // Set the first annotation as active and store all overlapping annotations
+              if (segment.annotations.length > 0) {
+                const { pinnedAnnotationId, overlappingAnnotationIds } = useAppStore.getState();
+                
+                // If something is pinned, don't change the overlapping IDs
+                if (pinnedAnnotationId) {
+                  // Only update active if hovering over an annotation in the pinned set
+                  const hoveredId = segment.annotations[0].id;
+                  if (overlappingAnnotationIds.includes(hoveredId)) {
+                    setActiveAnnotation(hoveredId);
+                  }
+                } else {
+                  // Normal behavior: update both active and overlapping IDs
+                  setActiveAnnotation(segment.annotations[0].id, segment.annotations.map(a => a.id));
+                }
+              }
+            }}
+            onMouseLeave={() => {
+              // Don't clear if annotation is pinned
+              // The active state will be maintained by pinned annotation
+            }}
+            onClick={(e) => {
+              e.stopPropagation();
+              // Toggle pin: if already pinned, unpin; otherwise pin
+              if (segment.annotations.length > 0) {
+                const { pinnedAnnotationId, activeAnnotationId } = useAppStore.getState();
+                // Use the active annotation ID if available, otherwise use the first one
+                const targetAnnotationId = activeAnnotationId || segment.annotations[0].id;
+                
+                if (pinnedAnnotationId === targetAnnotationId) {
+                  // Unpin if clicking the same annotation
+                  setPinnedAnnotation(null);
+                } else {
+                  // Pin the annotation with all overlapping annotations
+                  setPinnedAnnotation(targetAnnotationId, segment.annotations.map(a => a.id));
+                }
+              }
+            }}
           >
             {segment.text}
           </span>

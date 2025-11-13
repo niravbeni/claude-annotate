@@ -7,6 +7,7 @@ import { LIMITS } from '@/lib/constants';
 import { toast } from 'sonner';
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
+import { Switch } from '@/components/ui/switch';
 
 export function TextEditor() {
   const {
@@ -15,6 +16,8 @@ export function TextEditor() {
     isAnalyzing,
     isEditing,
     annotations,
+    annotationsVisible,
+    toggleAnnotations,
     startAnalysis,
     finishAnalysis,
     commentHistory,
@@ -146,12 +149,53 @@ export function TextEditor() {
   const showAnnotations = annotations.length > 0 && !isEditing;
   const hasAnnotations = annotations.length > 0;
 
+  const charCount = text.length;
+  const isNearLimit = charCount >= LIMITS.warnAtCharacters;
+  const isOverLimit = charCount > LIMITS.maxCharacters;
+
   return (
     <div className="relative h-full flex flex-col">
-      {/* Removed top status bar - moved to bottom */}
+      {/* Controls Bar - Above Text Box */}
+      <div className="px-8 pt-6 pb-2 flex items-center justify-between" style={{ backgroundColor: '#FAF9F5' }}>
+        {/* Left: Show Annotations Toggle */}
+        <div className="flex items-center gap-2 cursor-pointer">
+          <label
+            htmlFor="annotations-toggle-editor"
+            className="text-ui-body-small text-gray-700 cursor-pointer"
+          >
+            Show Annotations
+          </label>
+          <Switch
+            id="annotations-toggle-editor"
+            checked={annotationsVisible}
+            onCheckedChange={toggleAnnotations}
+            className="cursor-pointer"
+          />
+        </div>
+
+        {/* Right: Annotation Count + Character Count */}
+        <div className="flex items-center gap-4">
+          {annotations.length > 0 && (
+            <div className="text-ui-body-small text-gray-600">
+              {annotations.length} annotation{annotations.length !== 1 ? 's' : ''}
+            </div>
+          )}
+          <div
+            className={`text-ui-body-small ${
+              isOverLimit
+                ? 'text-red-600 font-semibold'
+                : isNearLimit
+                ? 'text-yellow-600'
+                : 'text-gray-500'
+            }`}
+          >
+            {charCount} / {LIMITS.maxCharacters}
+          </div>
+        </div>
+      </div>
 
       {/* Text Content */}
-      <div className="flex-1 px-8 py-6" style={{ backgroundColor: '#FAF9F5' }}>
+      <div className="flex-1 px-8 pb-6" style={{ backgroundColor: '#FAF9F5' }}>
         <div className="relative">
           {showAnnotations ? (
             <>
@@ -170,34 +214,41 @@ export function TextEditor() {
                     priority
                   />
                 </div>
-                
-                {/* Annotation Count - bottom center */}
-                <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 text-ui-body-small text-gray-500">
-                  {annotations.length} annotation{annotations.length !== 1 ? 's' : ''} active
-                </div>
-              </div>
-              {/* Action Buttons - positioned at bottom right */}
-              <div className="absolute bottom-3 right-3 z-10 flex items-center gap-2">
-                {/* Copy Button */}
+
+                {/* Copy Button - top right */}
                 <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(text);
+                  onClick={() => navigator.clipboard.writeText(text)}
+                  className="absolute top-3 right-3 z-10 flex items-center justify-center transition-all cursor-pointer hover:bg-gray-50 active:scale-95 bg-white"
+                  style={{
+                    height: '32px',
+                    padding: '0px 12px',
+                    borderWidth: '0.5px 0.5px 1px 0.5px',
+                    borderStyle: 'solid',
+                    borderColor: 'rgba(31, 30, 29, 0.15)',
+                    borderRadius: '8px',
                   }}
-                  className="rounded-full p-2.5 transition-all cursor-pointer hover:bg-gray-50 active:scale-95 bg-white"
                   aria-label="Copy to clipboard"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
+                  <span className="text-ui-body-small" style={{ color: '#1F1E1D' }}>
+                    Copy
+                  </span>
                 </button>
+              </div>
+              {/* Action Buttons - positioned at bottom right */}
+              <div className="absolute bottom-6 right-6 z-10 flex items-center gap-2">
                 {/* Edit Button */}
                 <button
                   onClick={() => setEditing(true)}
-                  className="rounded-full p-2.5 transition-all cursor-pointer shadow-md hover:shadow-lg active:scale-95 bg-black hover:bg-gray-700"
+                  className="rounded-lg transition-all cursor-pointer hover:bg-gray-700 active:bg-gray-800 active:scale-95 bg-black flex items-center justify-center"
+                  style={{
+                    width: '40px',
+                    height: '40px',
+                    border: '0.5px solid rgba(31, 30, 29, 0.15)',
+                    boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)'
+                  }}
                   aria-label="Edit text"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
                     <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
                   </svg>
@@ -231,23 +282,29 @@ export function TextEditor() {
                     priority
                   />
                 </div>
+
+                {/* Copy Button - top right */}
+                <button
+                  onClick={() => navigator.clipboard.writeText(text)}
+                  className="absolute top-3 right-3 z-10 flex items-center justify-center transition-all cursor-pointer hover:bg-gray-50 active:scale-95 bg-white"
+                  style={{
+                    height: '32px',
+                    padding: '0px 12px',
+                    borderWidth: '0.5px 0.5px 1px 0.5px',
+                    borderStyle: 'solid',
+                    borderColor: 'rgba(31, 30, 29, 0.15)',
+                    borderRadius: '8px',
+                  }}
+                  aria-label="Copy to clipboard"
+                >
+                  <span className="text-ui-body-small" style={{ color: '#1F1E1D' }}>
+                    Copy
+                  </span>
+                </button>
               </div>
               
               {/* Action Buttons - positioned at bottom right */}
-              <div className="absolute bottom-3 right-3 z-20 flex items-center gap-2">
-                {/* Copy Button */}
-                <button
-                  onClick={() => {
-                    navigator.clipboard.writeText(text);
-                  }}
-                  className="rounded-full p-2.5 transition-all cursor-pointer hover:bg-gray-50 active:scale-95 bg-white"
-                  aria-label="Copy to clipboard"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-                  </svg>
-                </button>
+              <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2">
                 {/* Send Button */}
                 <AnalyzeButton
                   isAnalyzing={isAnalyzing}

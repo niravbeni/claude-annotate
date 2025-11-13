@@ -27,14 +27,22 @@ export interface AppState {
   text: string;
   isEditing: boolean;
   isAnalyzing: boolean;
+  textEditHistory: string[]; // Track text changes for chat context
 
   // Annotations
   annotations: Annotation[];
   annotationsVisible: boolean;
+  activeAnnotationId: string | null; // Currently displayed annotation (hover)
+  overlappingAnnotationIds: string[]; // All annotations at current hover/click position
+  pinnedAnnotationId: string | null; // Clicked/pinned annotation
 
-  // Comment history
+  // Comment history (deprecated - keeping for backward compatibility)
   commentHistory: Annotation[];
 
+  // Chat system
+  annotationChats: Record<string, import('./chat').ChatMessage[]>; // Chat per annotation
+  savedAnnotations: import('./chat').SavedAnnotationWithChat[]; // Saved annotations with chats
+  
   // Browser modal
   activeBrowserReference: BrowserReference | null;
   isBrowserModalFullscreen: boolean;
@@ -45,9 +53,25 @@ export interface AppState {
   startAnalysis: () => void;
   finishAnalysis: (annotations: Annotation[]) => void;
   toggleAnnotations: () => void;
+  
+  // Annotation interaction
+  setActiveAnnotation: (id: string | null, overlappingIds?: string[]) => void;
+  setPinnedAnnotation: (id: string | null, overlappingIds?: string[]) => void;
+  cycleOverlappingAnnotation: (direction: 'next' | 'prev') => void;
+  
+  // Chat actions
+  addChatMessage: (annotationId: string, message: import('./chat').ChatMessage) => void;
+  clearAnnotationChat: (annotationId: string) => void;
+  saveAnnotationWithChat: (annotationId: string) => void;
+  loadSavedAnnotation: (index: number) => void;
+  deleteSavedAnnotation: (index: number) => void;
+  
+  // Browser modal actions
   openBrowserModal: (reference: BrowserReference, position: { x: number; y: number }) => void;
   closeBrowserModal: () => void;
   toggleBrowserFullscreen: () => void;
+  
+  // Legacy actions (for backward compatibility)
   resetToDefault: () => void;
   deleteAnnotationFromHistory: (id: string) => void;
   toggleBookmarkAnnotation: (id: string) => void;

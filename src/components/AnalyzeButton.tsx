@@ -1,6 +1,5 @@
 'use client';
 
-import { motion } from 'framer-motion';
 import { AnalyzeButtonProps } from '@/types';
 
 export function AnalyzeButton({ isAnalyzing, isDisabled, onClick }: AnalyzeButtonProps) {
@@ -9,20 +8,23 @@ export function AnalyzeButton({ isAnalyzing, isDisabled, onClick }: AnalyzeButto
       onClick={onClick}
       disabled={isDisabled || isAnalyzing}
       className={`
-        relative rounded-full p-2 transition-all cursor-pointer
+        relative flex items-center justify-center rounded-lg transition-all cursor-pointer
         ${isDisabled || isAnalyzing 
           ? 'bg-gray-300 cursor-not-allowed' 
-          : 'hover:opacity-90 active:scale-95'
+          : 'bg-[#C6613F] hover:bg-[#E08A68] active:scale-95'
         }
-        disabled:opacity-50 shadow-md hover:shadow-lg
+        disabled:opacity-50
       `}
       style={{
-        backgroundColor: isDisabled || isAnalyzing ? undefined : '#C6613F'
+        width: '40px',
+        height: '40px',
+        border: '0.5px solid rgba(31, 30, 29, 0.15)',
+        boxShadow: '0px 1px 2px rgba(0, 0, 0, 0.05)'
       }}
       aria-label={isAnalyzing ? 'Analyzing text' : 'Send text for analysis'}
       aria-busy={isAnalyzing}
     >
-      {/* Custom arrow with longer vertical line */}
+      {/* Custom arrow */}
       <svg 
         className="h-6 w-6 text-white" 
         viewBox="0 0 24 24" 
@@ -33,10 +35,10 @@ export function AnalyzeButton({ isAnalyzing, isDisabled, onClick }: AnalyzeButto
         strokeLinejoin="round"
         aria-hidden="true"
       >
-        {/* Long vertical line - from bottom connecting to arrow point */}
-        <line x1="12" y1="21" x2="12" y2="4" />
-        {/* Arrow head - sides only */}
-        <polyline points="6 8 12 4 18 8" />
+        {/* Vertical line */}
+        <line x1="12" y1="18" x2="12" y2="7" />
+        {/* Arrow head */}
+        <polyline points="7 11 12 7 17 11" />
       </svg>
     </button>
   );

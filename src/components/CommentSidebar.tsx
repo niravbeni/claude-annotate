@@ -1,104 +1,76 @@
 'use client';
 
+import { useState } from 'react';
+import { AnnotationCarousel } from './AnnotationCarousel';
+import { AnnotationChat } from './AnnotationChat';
+import { SavedAnnotationsList } from './SavedAnnotationsList';
 import { useAppStore } from '@/lib/store';
-import { CommentCard } from './CommentCard';
-import { MessageSquare } from 'lucide-react';
-import { Switch } from '@/components/ui/switch';
-import { LIMITS } from '@/lib/constants';
 
 export function CommentSidebar() {
-  const { commentHistory, openBrowserModal, text, annotationsVisible, toggleAnnotations, clearHistory } = useAppStore();
-  const charCount = text.length;
-  const isNearLimit = charCount >= LIMITS.warnAtCharacters;
-  const isOverLimit = charCount > LIMITS.maxCharacters;
-
-  // Sort annotations: bookmarked first, then by timestamp
-  const sortedHistory = [...commentHistory].sort((a, b) => {
-    if (a.bookmarked && !b.bookmarked) return -1;
-    if (!a.bookmarked && b.bookmarked) return 1;
-    return new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime();
-  });
+  const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
+  const { savedAnnotations } = useAppStore();
 
   return (
-    <div className="h-full flex flex-col" style={{ backgroundColor: '#F5F4ED' }}>
-      {/* Header */}
-      <div className="sticky top-0 border-b px-4 py-4 z-10" style={{ backgroundColor: '#F5F4ED' }}>
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <h2 className="text-ui-body-large-bold text-gray-800 flex items-center gap-2">
-              <MessageSquare className="h-5 w-5" />
-              Annotation History
-            </h2>
-            <div className="flex items-center gap-2 mt-1">
-              <p className="text-ui-body-extra-small text-gray-500">
-                {commentHistory.length} annotation{commentHistory.length !== 1 ? 's' : ''}
-              </p>
-              {commentHistory.length > 0 && (
-                <button
-                  onClick={clearHistory}
-                  className="text-ui-body-extra-small text-gray-500 hover:text-gray-700 cursor-pointer"
-                >
-                  Clear All
-                </button>
-              )}
-            </div>
-          </div>
-          
-          <div className="flex flex-col items-end gap-3">
-            {/* Character Count */}
-            <div
-              className={`text-ui-body-small ${
-                isOverLimit
-                  ? 'text-red-600 font-semibold'
-                  : isNearLimit
-                  ? 'text-yellow-600'
-                  : 'text-gray-500'
-              }`}
-            >
-              {charCount} / {LIMITS.maxCharacters}
-            </div>
-
-            {/* Show Annotations Toggle */}
-            <div className="flex items-center gap-2 cursor-pointer">
-              <label
-                htmlFor="annotations-toggle-sidebar"
-                className="text-ui-body-small text-gray-700 cursor-pointer"
-              >
-                Show Annotations
-              </label>
-              <Switch
-                id="annotations-toggle-sidebar"
-                checked={annotationsVisible}
-                onCheckedChange={toggleAnnotations}
-                className="cursor-pointer"
+    <div className="h-full flex flex-col bg-[#FAF9F5]">
+      {/* Tab Switcher */}
+      <div className="px-6 pt-6 pb-0 bg-[#FAF9F5]">
+        <div className="flex gap-3 border-b" style={{ borderColor: 'rgba(31, 30, 29, 0.15)' }}>
+          <button
+            onClick={() => setActiveTab('active')}
+            className={`px-2 pb-3 text-ui-body-small-bold transition-all cursor-pointer relative ${
+              activeTab === 'active'
+                ? 'text-[#1F1E1D]'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Active
+            {activeTab === 'active' && (
+              <div 
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1F1E1D]"
               />
-            </div>
-          </div>
+            )}
+          </button>
+          <button
+            onClick={() => setActiveTab('history')}
+            className={`px-2 pb-3 text-ui-body-small-bold transition-all cursor-pointer relative flex items-center ${
+              activeTab === 'history'
+                ? 'text-[#1F1E1D]'
+                : 'text-gray-500 hover:text-gray-700'
+            }`}
+          >
+            Saved
+            {savedAnnotations.length > 0 && (
+              <span className="ml-2 px-2 py-0.5 bg-[#C6613F] text-white text-ui-body-extra-small rounded-full">
+                {savedAnnotations.length}
+              </span>
+            )}
+            {activeTab === 'history' && (
+              <div 
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#1F1E1D]"
+              />
+            )}
+          </button>
         </div>
       </div>
 
-      {/* Comment List */}
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        {commentHistory.length === 0 ? (
-              <div className="text-center py-12">
-                <MessageSquare className="h-12 w-12 text-gray-300 mx-auto mb-3" />
-                <p className="text-ui-body-small text-gray-500">
-                  No annotations yet.
-                </p>
-              </div>
-        ) : (
-          <div className="space-y-3">
-            {sortedHistory.map((annotation) => (
-              <CommentCard
-                key={annotation.id}
-                annotation={annotation}
-                onReferenceClick={openBrowserModal}
-              />
-            ))}
+      {/* Tab Content */}
+      {activeTab === 'active' ? (
+        <div className="flex-1 flex flex-col overflow-hidden bg-[#FAF9F5]">
+          {/* Annotation Carousel - Top section with outline only, no background */}
+          <div className="m-4 mb-0 p-4 border border-gray-300 rounded-lg">
+            <AnnotationCarousel />
           </div>
-        )}
-      </div>
+
+          {/* Chat Interface - Bottom section with outline only, no background */}
+          <div className="flex-1 overflow-hidden m-4 mt-4 border border-gray-300 rounded-lg">
+            <AnnotationChat />
+          </div>
+        </div>
+      ) : (
+        <div className="flex-1 overflow-hidden bg-[#FAF9F5] p-4">
+          <SavedAnnotationsList />
+        </div>
+      )}
     </div>
   );
 }
-
