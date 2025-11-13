@@ -50,6 +50,9 @@ const jetbrainsMono = localFont({
 export const metadata: Metadata = {
   title: "Claude",
   description: "Get AI-powered feedback on your writing with visual annotations",
+  icons: {
+    icon: "/images/thinking0.png",
+  },
 };
 
 export default function RootLayout({
