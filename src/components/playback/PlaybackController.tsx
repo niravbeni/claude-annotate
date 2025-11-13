@@ -718,8 +718,12 @@ export function PlaybackController() {
   };
 
   const executeRestart = async () => {
-    console.log('[Playback] Restarting loop - reloading page...');
+    console.log('[Playback] Restarting loop - clearing text and reloading...');
     await sleep(2000); // Brief pause before restarting
+    
+    // Clear the text immediately to prevent glitch on reload
+    setText('');
+    await sleep(300); // Brief moment to show cleared state
     
     // Reload the page for clean restart
     window.location.reload();
