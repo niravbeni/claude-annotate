@@ -427,3 +427,90 @@ span strong {
   color: #374151 !important;
   font-weight: 600;
 }
+
+/* Thin scrollbars with spacing for saved annotations */
+.saved-list-scroll {
+  padding-right: 8px;
+}
+
+.saved-list-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.saved-list-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin-right: 4px;
+}
+
+.saved-list-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.saved-list-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Thin scrollbars for chat history in saved annotations */
+.saved-chat-scroll {
+  padding-right: 12px;
+  margin-right: -4px;
+}
+
+.saved-chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.saved-chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.saved-chat-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.saved-chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Thin scrollbars for active chat messages area */
+.active-chat-scroll {
+  padding-right: 12px;
+  margin-right: -4px;
+}
+
+.active-chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.active-chat-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.active-chat-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.active-chat-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Thin scrollbars for chat input textarea */
+.chat-input-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.chat-input-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-input-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 2px;
+}
+
+.chat-input-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}

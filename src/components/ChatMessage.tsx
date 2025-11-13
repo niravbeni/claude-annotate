@@ -1,8 +1,8 @@
 'use client';
 
 import { ChatMessage as ChatMessageType } from '@/types/chat';
-import { format } from 'date-fns';
 import { memo } from 'react';
+import Image from 'next/image';
 
 interface ChatMessageProps {
   message: ChatMessageType;
@@ -25,10 +25,18 @@ const ChatMessageComponent = ({ message }: ChatMessageProps) => {
           <p className="text-ui-body-small whitespace-pre-wrap">{message.content}</p>
         </div>
         
-        {/* Timestamp */}
-        <p className={`text-ui-body-extra-small text-gray-400 mt-1 ${isUser ? 'text-right' : 'text-left'}`}>
-          {format(new Date(message.timestamp), 'HH:mm')}
-        </p>
+        {/* Static thinking icon for Claude's messages */}
+        {!isUser && (
+          <div className="mt-1">
+            <Image
+              src="/images/thinking0.png"
+              alt="Claude"
+              width={20}
+              height={20}
+              priority
+            />
+          </div>
+        )}
       </div>
     </div>
   );

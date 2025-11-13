@@ -3,8 +3,9 @@
 import { useAppStore } from '@/lib/store';
 import { ChatMessage } from './ChatMessage';
 import { useState, useRef, useEffect } from 'react';
-import { Send, Loader2, RotateCcw } from 'lucide-react';
+import { Send, RotateCcw } from 'lucide-react';
 import { ChatMessage as ChatMessageType } from '@/types/chat';
+import Image from 'next/image';
 
 export function AnnotationChat() {
   const {
@@ -22,10 +23,26 @@ export function AnnotationChat() {
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [writingFrame, setWritingFrame] = useState(0);
+  const WRITING_FRAMES = 8; // writing0.png through writing7.png
 
   const activeId = pinnedAnnotationId || activeAnnotationId;
   const activeAnnotation = annotations.find(a => a.id === activeId);
   const messages = activeId ? annotationChats[activeId] || [] : [];
+
+  // Writing animation while sending
+  useEffect(() => {
+    if (!isSending) {
+      setWritingFrame(0);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setWritingFrame((prev) => (prev + 1) % WRITING_FRAMES);
+    }, 100); // 100ms per frame = ~10 fps
+
+    return () => clearInterval(interval);
+  }, [isSending, WRITING_FRAMES]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -113,7 +130,7 @@ export function AnnotationChat() {
     return (
       <div className="h-full flex items-center justify-center p-6">
         <p className="text-ui-body-small text-gray-500 text-center">
-          Select an annotation to start chatting with Claude
+          Analyze your text and select an annotation to chat with Claude
         </p>
       </div>
     );
@@ -136,8 +153,8 @@ export function AnnotationChat() {
       )}
       
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.length === 0 ? (
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 active-chat-scroll">
+        {messages.length === 0 && !isSending ? (
           <div className="h-full flex items-center justify-center">
             <p className="text-ui-body-small text-gray-500 text-center">
               Ask Claude about this annotation
@@ -148,6 +165,24 @@ export function AnnotationChat() {
             {messages.map((message) => (
               <ChatMessage key={message.id} message={message} />
             ))}
+            
+            {/* Loading indicator with animated writing icon */}
+            {isSending && (
+              <div className="flex justify-start mb-4">
+                <div className="max-w-[85%]">
+                  <div className="text-gray-900">
+                    <Image
+                      src={`/images/writing${writingFrame}.png`}
+                      alt="Claude is writing"
+                      width={20}
+                      height={20}
+                      priority
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+            
             <div ref={messagesEndRef} />
           </>
         )}
@@ -165,7 +200,7 @@ export function AnnotationChat() {
             onKeyDown={handleKeyDown}
             placeholder="Reply to Claude..."
             disabled={isSending}
-            className="w-full resize-none px-3 py-2 pr-11 bg-transparent border-none rounded-lg focus:outline-none text-ui-body-small disabled:opacity-50"
+            className="w-full resize-none px-3 py-2 pr-12 bg-transparent border-none rounded-lg focus:outline-none text-ui-body-small disabled:opacity-50 chat-input-scroll"
             rows={1}
             style={{ minHeight: '36px', maxHeight: '64px' }}
           />
@@ -182,10 +217,7 @@ export function AnnotationChat() {
             }}
             aria-label="Send message"
           >
-            {isSending ? (
-              <Loader2 className="h-4 w-4 text-white animate-spin" />
-            ) : (
-              <svg 
+            <svg 
                 width="20" 
                 height="20" 
                 viewBox="0 0 24 24" 
@@ -196,7 +228,6 @@ export function AnnotationChat() {
                 <line x1="12" y1="18" x2="12" y2="7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
                 <polyline points="7 12 12 7 17 12" stroke="white" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
               </svg>
-            )}
           </button>
         </div>
       </div>

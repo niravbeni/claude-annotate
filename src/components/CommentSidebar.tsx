@@ -8,7 +8,9 @@ import { useAppStore } from '@/lib/store';
 
 export function CommentSidebar() {
   const [activeTab, setActiveTab] = useState<'active' | 'history'>('active');
-  const { savedAnnotations } = useAppStore();
+  const { savedAnnotations, activeAnnotationId, pinnedAnnotationId } = useAppStore();
+  
+  const hasActiveAnnotation = activeAnnotationId || pinnedAnnotationId;
 
   return (
     <div className="h-full flex flex-col bg-[#FAF9F5]">
@@ -56,8 +58,8 @@ export function CommentSidebar() {
       {/* Tab Content */}
       {activeTab === 'active' ? (
         <div className="flex-1 flex flex-col overflow-hidden bg-[#FAF9F5]">
-          {/* Annotation Carousel - Top section with white background */}
-          <div className="m-4 mb-0 p-4 border border-gray-300 rounded-lg bg-white">
+          {/* Annotation Carousel - Top section with white background only when annotation is active */}
+          <div className={`m-4 mb-0 p-4 border border-gray-300 rounded-lg ${hasActiveAnnotation ? 'bg-white' : ''}`}>
             <AnnotationCarousel />
           </div>
 

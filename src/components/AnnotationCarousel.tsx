@@ -13,6 +13,7 @@ export function AnnotationCarousel() {
     overlappingAnnotationIds,
     saveAnnotationWithChat,
     cycleOverlappingAnnotation,
+    savedAnnotations,
   } = useAppStore();
 
   // Get the active annotation (pinned takes priority over hovered)
@@ -27,6 +28,9 @@ export function AnnotationCarousel() {
   const currentIndex = overlappingAnnotationIds.findIndex(id => id === displayAnnotationId);
   // Always show position, even for single annotations (1/1)
   const annotationPosition = `${currentIndex >= 0 ? currentIndex + 1 : 1}/${overlappingAnnotationIds.length || 1}`;
+  
+  // Check if this annotation is already saved
+  const isSaved = activeAnnotation ? savedAnnotations.some(saved => saved.annotation.id === activeAnnotation.id) : false;
 
   const getIcon = (type: string) => {
     switch (type) {
@@ -60,7 +64,7 @@ export function AnnotationCarousel() {
     return (
       <div className="h-[200px] flex items-center justify-center p-6">
         <p className="text-ui-body-small text-gray-500 text-center">
-          Hover over or click an annotation to view details
+          Analyze your text to see annotations appear here
         </p>
       </div>
     );
@@ -89,7 +93,11 @@ export function AnnotationCarousel() {
             className="p-2 rounded-md hover:bg-gray-100 active:scale-95 transition-all cursor-pointer"
             aria-label="Save annotation"
           >
-            <Star className="h-5 w-5" style={{ color: '#C6613F' }} />
+            <Star 
+              className="h-5 w-5" 
+              style={{ color: '#C6613F' }} 
+              fill={isSaved ? '#C6613F' : 'none'}
+            />
           </button>
         </div>
 

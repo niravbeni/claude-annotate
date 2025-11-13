@@ -274,6 +274,19 @@ export const useAppStore = create<AppState>((set) => ({
       const annotation = state.annotations.find(a => a.id === annotationId);
       if (!annotation) return state;
 
+      // Check if already saved - if so, unsave it
+      const existingIndex = state.savedAnnotations.findIndex(
+        saved => saved.annotation.id === annotationId
+      );
+      
+      if (existingIndex !== -1) {
+        // Remove from saved annotations (unsave)
+        return {
+          savedAnnotations: state.savedAnnotations.filter((_, i) => i !== existingIndex),
+        };
+      }
+
+      // Otherwise, save it
       const chat = state.annotationChats[annotationId] || [];
       const savedItem: SavedAnnotationWithChat = {
         annotation,

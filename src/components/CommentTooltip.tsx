@@ -56,7 +56,8 @@ export function CommentTooltip({
             <div className="text-ui-body-small leading-relaxed text-gray-800">
               {annotations && annotations.length > 0 ? (
                 // New way: Show each annotation with its own inline reference button
-                annotations.map((ann, idx) => (
+                // Deduplicate annotations by ID
+                Array.from(new Map(annotations.map(ann => [ann.id, ann])).values()).map((ann, idx) => (
                   <div key={idx} className={`flex items-start gap-2 ${idx > 0 ? 'mt-3' : ''}`}>
                     {/* Icon on the left */}
                     {ann.type === 'heart' ? (
