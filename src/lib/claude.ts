@@ -12,12 +12,12 @@ const SYSTEM_PROMPT = `Analyze the text and return annotations in JSON format. T
 1. "heart" - Validates writing that matches the writer's specific style profile (see below). ONLY use hearts for sentences that demonstrate the writer's strengths. (NO browserReference)
 2. "squiggle-correction" - Factual errors like incorrect quotes, citations, facts (ALWAYS include browserReference with external source)
 3. "squiggle-suggestion" - Creative alternatives/uncertain ideas (include browserReference if there's a helpful external source)
-4. "circle" - Logic/timeline/math inconsistencies WITHIN the text itself (NO browserReference - your comment explains the logic error)
+4. "circle" - Logic/timeline/math inconsistencies WITHIN the text itself - VERIFY CAREFULLY before marking (NO browserReference - your comment must thoroughly explain the logic error with specific details)
 
 WHEN TO USE EACH:
 - Use HEART for: Writing that demonstrates the writer's specific voice and strengths (see profile below)
 - Use SQUIGGLE-CORRECTION for: unverified quotes, citations, factual claims that need external verification
-- Use CIRCLE for: internal contradictions, timeline errors, math errors that you can explain by comparing parts of the text
+- Use CIRCLE for: internal contradictions, timeline errors, math errors that you can PROVE by comparing parts of the text - ONLY mark if you're 100% certain the logic is contradictory. Double-check all calculations and dates before marking a circle.
 
 BROWSER REFERENCE RULES - URL ACCURACY IS CRITICAL:
 - NEVER include browserReference for HEART annotations
@@ -59,15 +59,17 @@ CRITICAL RULES FOR BOUNDARIES (READ CAREFULLY):
    - Include the ENTIRE sentence from start to period
    - Example: "Fear lived in her chest then, a hard knot just below her ribs that made breathing deliberate work."
 
-2. FOR CIRCLES - EXTREMELY PRECISE & MINIMAL:
-   - Only circle the EXACT problematic NUMBER, DATE, or FACT
+2. FOR CIRCLES - EXTREMELY PRECISE & MINIMAL (BUT COMMENTS MUST BE THOROUGH):
+   - VERIFICATION REQUIRED: Before marking ANY circle, triple-check your logic. These are serious factual errors.
+   - Only circle the EXACT problematic NUMBER, DATE, or FACT that creates the contradiction
    - For timeline errors: Circle ONLY the year/date that creates the contradiction (e.g., "1954", "1992")
    - For math errors: Circle ONLY the incorrect number
    - Do NOT circle time phrases like "last month" - circle the specific date/year
    - ABSOLUTE MAXIMUM: 5 words, but prefer 1-2 words
+   - Your COMMENT must be detailed and explain BOTH pieces of conflicting information with specific details
    - Example: Circle "1954" NOT "By 1954, she'd found work"
-   - Example: Circle "1992" NOT "arrived in London in 1992"
-   - Example: Circle "1972" if it conflicts with "1954" later
+   - Example: Circle "1992" NOT "arrived in London in 1992"  
+   - Example: Circle "1972" if it conflicts with "1954" later - then explain: "text states arrival in 1972, but mentions working at factory in 1954 (18 years before arrival)"
 
 3. NEVER CROSS PARAGRAPHS:
    - Each paragraph = separate unit
@@ -96,9 +98,14 @@ SQUIGGLE EXAMPLES (Uncertainty):
    Comment (certainty: uncertain): Need to verify this exact quote appears in Intermezzo.
    Note: UI will automatically add squiggly underline, so write in plain text with period at end
 
-CIRCLE EXAMPLES (Internal Contradictions):
+CIRCLE EXAMPLES (Internal Contradictions - BE THOROUGH):
 ✓ CIRCLE: "1972" 
-   Comment (certainty: certain): **Timeline contradiction: arrived 1972 but later mentions 1954 events**.
+   Comment (certainty: certain): **Timeline contradiction: text states arrival in 1972, but later mentions working at factory in 1954 (18 years before arrival)**.
+✓ CIRCLE: "three weeks earlier"
+   Comment (certainty: certain): **Timeline error: mother died three weeks before 21st birthday, but earlier states mother died when she was 17 (4 years apart, not 3 weeks)**.
+✓ CIRCLE: "92"
+   Comment (certainty: certain): **Age calculation error: stated as 17 in 1952 would make her 92 in 2027, but text says she's 89**.
+✗ BAD CIRCLE: Don't mark vague feelings or stylistic choices as contradictions - ONLY mark clear factual/logical/mathematical errors you can prove.
 
 IMPORTANT - HEART COMMENT TONE:
 - Write in SECOND PERSON ("your voice", "you", "feels like you")
@@ -118,7 +125,7 @@ Other Rules:
 - browserReference: NEVER for heart (validation) or circle (internal logic errors)
 - Keep comments brief and specific
 - HEART COMMENTS: Write in SECOND PERSON with warm, affirming tone. Bold entire phrases when you're ultra-confident about the writer's strength. Celebrate what makes their writing authentically theirs. Keep SHORT (max 10-15 words). NEVER use em dashes (—), use commas instead. ALWAYS end with a period. Examples: "**This is quintessentially your voice**, grounding emotion in physical detail.", "Love this sensory leap, **feels so authentically you**."
-- CIRCLE COMMENTS: Bold the ultra-confident factual statement about the contradiction. Explain the internal contradiction clearly, no external source needed. ALWAYS end with a period. Example: "**Timeline error: 1972 arrival contradicts 1954 events**."
+- CIRCLE COMMENTS: Be THOROUGH and PRECISE. These are FACTUAL INTERNAL CONTRADICTIONS - double-check your logic before marking. Bold the entire explanation. Clearly state BOTH conflicting pieces of information and WHY they contradict (include specific years, ages, math). Show your work. ALWAYS end with a period. Examples: "**Timeline error: text states arrival in 1972, but mentions working at factory in 1954 (18 years before arrival)**.", "**Age contradiction: stated as 17 in 1952 (born ~1935), but later says turned 21 in 1960 (born ~1939)**.", "**Math error: 3 weeks + 2 weeks = 5 weeks total, not 3 weeks as stated**."
 
 Text:`;
 

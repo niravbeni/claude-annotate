@@ -155,52 +155,51 @@ export function TextEditor() {
 
   return (
     <div className="relative h-full flex flex-col">
-      {/* Controls Bar - Above Text Box */}
-      <div className="px-8 pt-6 pb-2 flex items-center justify-between" style={{ backgroundColor: '#FAF9F5' }}>
-        {/* Left: Show Annotations Toggle */}
-        <div className="flex items-center gap-2 cursor-pointer">
-          <label
-            htmlFor="annotations-toggle-editor"
-            className="text-ui-body-small text-gray-700 cursor-pointer"
-          >
-            Show Annotations
-          </label>
-          <Switch
-            id="annotations-toggle-editor"
-            checked={annotationsVisible}
-            onCheckedChange={toggleAnnotations}
-            className="cursor-pointer"
-          />
-        </div>
-
-        {/* Right: Annotation Count + Character Count */}
-        <div className="flex items-center gap-4">
-          {annotations.length > 0 && (
-            <div className="text-ui-body-small text-gray-600">
-              {annotations.length} annotation{annotations.length !== 1 ? 's' : ''}
-            </div>
-          )}
-          <div
-            className={`text-ui-body-small ${
-              isOverLimit
-                ? 'text-red-600 font-semibold'
-                : isNearLimit
-                ? 'text-yellow-600'
-                : 'text-gray-500'
-            }`}
-          >
-            {charCount} / {LIMITS.maxCharacters}
-          </div>
-        </div>
-      </div>
-
       {/* Text Content */}
-      <div className="flex-1 px-8 pb-6" style={{ backgroundColor: '#FAF9F5' }}>
-        <div className="relative">
+      <div className="h-[calc(100vh-80px)] px-8 pt-6 pb-6" style={{ backgroundColor: '#FAF9F5' }}>
+        <div className="relative max-w-[700px] mx-auto h-full flex flex-col">
+          {/* Controls Bar - Above Text Box */}
+          <div className="pb-2 flex items-center justify-between">
+            {/* Left: Show Annotations Toggle */}
+            <div className="flex items-center gap-2 cursor-pointer">
+              <label
+                htmlFor="annotations-toggle-editor"
+                className="text-ui-body-small text-gray-700 cursor-pointer"
+              >
+                Show Annotations
+              </label>
+              <Switch
+                id="annotations-toggle-editor"
+                checked={annotationsVisible}
+                onCheckedChange={toggleAnnotations}
+                className="cursor-pointer"
+              />
+            </div>
+
+            {/* Right: Annotation Count + Character Count */}
+            <div className="flex items-center gap-4">
+              {annotations.length > 0 && (
+                <div className="text-ui-body-small text-gray-600">
+                  {annotations.length} annotation{annotations.length !== 1 ? 's' : ''}
+                </div>
+              )}
+              <div
+                className={`text-ui-body-small ${
+                  isOverLimit
+                    ? 'text-red-600 font-semibold'
+                    : isNearLimit
+                    ? 'text-yellow-600'
+                    : 'text-gray-500'
+                }`}
+              >
+                {charCount} / {LIMITS.maxCharacters}
+              </div>
+            </div>
+          </div>
           {showAnnotations ? (
             <>
               {/* Annotated Text inside textbox outline */}
-              <div className="w-full min-h-[600px] px-[36px] py-4 pt-[96px] pb-24 border rounded-lg bg-white overflow-auto relative">
+              <div className="w-full flex-1 px-[56px] py-4 pt-[96px] pb-24 border rounded-lg bg-white overflow-hidden relative">
                 <AnnotatedText />
                 
                 {/* Claude Icon - top left */}
@@ -258,14 +257,20 @@ export function TextEditor() {
           ) : (
             <>
               {/* Edit mode - clean textarea for editing */}
-              <div className="relative">
+              <div className="relative flex-1 flex flex-col">
                 <textarea
                   ref={textareaRef}
                   value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  className="w-full min-h-[600px] px-[36px] py-4 pt-[88px] pb-16 editor-text border rounded-lg bg-white resize-none focus:outline-none focus:ring-2 focus:ring-[#C6613F]"
+                  onChange={(e) => {
+                    // Only allow changes if under the limit
+                    if (e.target.value.length <= LIMITS.maxCharacters) {
+                      setText(e.target.value);
+                    }
+                  }}
+                  className="w-full flex-1 px-[56px] py-4 pt-[88px] pb-16 editor-text border rounded-lg bg-white resize-none focus:outline-none focus:ring-2 focus:ring-[#C6613F]"
                   style={{
                     cursor: 'text',
+                    overflow: 'hidden',
                   }}
                   placeholder="Paste your text here..."
                   disabled={isAnalyzing}

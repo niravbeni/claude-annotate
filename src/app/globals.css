@@ -210,7 +210,6 @@
   line-height: 1.6;
   font-weight: 400;
   color: #1a1a1a !important;
-  overflow: hidden; /* Hide scrollbar */
 }
 
 .editor-text * {
@@ -512,5 +511,25 @@ span strong {
 }
 
 .chat-input-scroll::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Thin scrollbars for editor textarea */
+.editor-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.editor-scroll::-webkit-scrollbar-track {
+  background: transparent;
+  margin-top: 8px;
+  margin-bottom: 8px;
+}
+
+.editor-scroll::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 3px;
+}
+
+.editor-scroll::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }

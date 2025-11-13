@@ -130,14 +130,14 @@ export function SavedAnnotationsList() {
               </div>
 
               {/* Text Snippet */}
-              <div className="text-claude-body-small text-gray-700 mb-2 italic border-l-2 border-gray-300 pl-2">
+              <div className="text-claude-body-small text-gray-700 mb-2 italic border-l-2 border-gray-300 pl-2 break-words overflow-hidden">
                 "{saved.annotation.annotatedText.substring(0, 80)}
                 {saved.annotation.annotatedText.length > 80 ? '...' : ''}"
               </div>
 
               {/* Comment */}
               <div 
-                className={`text-ui-body-small text-gray-800 mb-2 ${
+                className={`text-ui-body-small text-gray-800 mb-2 break-words overflow-hidden ${
                   saved.annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
                 }`}
                 dangerouslySetInnerHTML={{

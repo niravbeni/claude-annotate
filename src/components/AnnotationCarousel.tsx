@@ -102,14 +102,14 @@ export function AnnotationCarousel() {
         </div>
 
         {/* Text Snippet */}
-        <div className="text-claude-body-small text-gray-700 mb-3 italic border-l-2 border-gray-300 pl-3">
+        <div className="text-claude-body-small text-gray-700 mb-3 italic border-l-2 border-gray-300 pl-3 break-words overflow-hidden">
           "{activeAnnotation.annotatedText.substring(0, 120)}
           {activeAnnotation.annotatedText.length > 120 ? '...' : ''}"
         </div>
 
         {/* Comment */}
         <div
-          className={`text-ui-body-small text-gray-800 leading-relaxed mb-3 ${
+          className={`text-ui-body-small text-gray-800 leading-relaxed mb-3 break-words overflow-hidden ${
             activeAnnotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
           }`}
           dangerouslySetInnerHTML={{

@@ -279,10 +279,15 @@ const AnnotatedTextComponent = ({ showTooltips = true }: AnnotatedTextProps) => 
         endIndex++;
       }
       
-      // Add this segment
+      // Add this segment with deduplicated annotations
+      // Use Map to deduplicate by ID
+      const uniqueAnnotations = Array.from(
+        new Map(currentAnnotations.map(ann => [ann.id, ann])).values()
+      );
+      
       result.push({
         text: text.slice(currentIndex, endIndex),
-        annotations: currentAnnotations,
+        annotations: uniqueAnnotations,
       });
       
       currentIndex = endIndex;
@@ -373,7 +378,11 @@ const AnnotatedTextComponent = ({ showTooltips = true }: AnnotatedTextProps) => 
         }
         
         // Sort annotations: hearts first, then others
-        const sortedAnnotations = [...segment.annotations].sort((a, b) => {
+        // Also deduplicate by ID in case there are duplicates
+        const uniqueAnnotations = Array.from(
+          new Map(segment.annotations.map(ann => [ann.id, ann])).values()
+        );
+        const sortedAnnotations = uniqueAnnotations.sort((a, b) => {
           if (a.type === 'heart' && b.type !== 'heart') return -1;
           if (a.type !== 'heart' && b.type === 'heart') return 1;
           return 0;

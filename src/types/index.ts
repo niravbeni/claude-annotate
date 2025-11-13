@@ -42,7 +42,7 @@ export interface AppState {
   // Chat system
   annotationChats: Record<string, import('./chat').ChatMessage[]>; // Chat per annotation
   savedAnnotations: import('./chat').SavedAnnotationWithChat[]; // Saved annotations with chats
-  
+
   // Browser modal
   activeBrowserReference: BrowserReference | null;
   isBrowserModalFullscreen: boolean;

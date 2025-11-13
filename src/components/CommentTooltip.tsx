@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Info, Heart, Waves, CircleAlert } from 'lucide-react';
+import { Globe, Heart, Waves, CircleAlert } from 'lucide-react';
 import { CommentTooltipProps } from '@/types';
 
 const formatComment = (comment: string) => {
@@ -90,7 +90,7 @@ export function CommentTooltip({
                           aria-label="View reference"
                           title="View reference"
                         >
-                          <Info className="h-3 w-3" strokeWidth={2.5} style={{ color: 'white', stroke: 'white', fill: 'none' }} />
+                          <Globe className="h-3 w-3" strokeWidth={2.5} style={{ color: 'white', stroke: 'white', fill: 'none' }} />
                         </button>
                       )}
                     </div>
@@ -113,7 +113,7 @@ export function CommentTooltip({
                       aria-label="View reference"
                       title="View reference"
                     >
-                      <Info className="h-3 w-3" strokeWidth={2.5} style={{ color: 'white', stroke: 'white', fill: 'none' }} />
+                      <Globe className="h-3 w-3" strokeWidth={2.5} style={{ color: 'white', stroke: 'white', fill: 'none' }} />
                     </button>
                   )}
                 </div>

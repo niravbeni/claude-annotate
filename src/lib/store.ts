@@ -92,9 +92,9 @@ export const useAppStore = create<AppState>((set) => ({
       }
       
       return {
-        text,
+      text,
         textEditHistory: newHistory,
-        isEditing: true,
+      isEditing: true,
         annotations: validAnnotations,
       };
     }),
@@ -118,13 +118,13 @@ export const useAppStore = create<AppState>((set) => ({
         .map((a) => ({ ...a, timestamp: new Date() }));
       
       return {
-        isAnalyzing: false,
+      isAnalyzing: false,
         isEditing: false,
-        annotations,
-        commentHistory: [
+      annotations,
+      commentHistory: [
           ...newAnnotations,
-          ...state.commentHistory,
-        ],
+        ...state.commentHistory,
+      ],
       };
     }),
 

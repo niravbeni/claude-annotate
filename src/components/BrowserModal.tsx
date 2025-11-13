@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { X, Maximize2, Minimize2, RotateCw } from 'lucide-react';
 import { BrowserModalProps } from '@/types';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -15,6 +15,7 @@ export function BrowserModal({
   const [iframeError, setIframeError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [iframeKey, setIframeKey] = useState(0);
+  const wasFullscreen = useRef(false);
 
   // Check if site is likely to block iframes on mount
   useEffect(() => {
@@ -73,7 +74,7 @@ export function BrowserModal({
 
   // Calculate popover position
   const getPopoverPosition = () => {
-    if (!triggerPosition || isFullscreen) {
+    if (isFullscreen) {
       return {};
     }
 
@@ -82,6 +83,36 @@ export function BrowserModal({
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const padding = 16;
+
+    // If minimizing from fullscreen, use centered position
+    if (wasFullscreen.current && !isFullscreen) {
+      // Center horizontally and vertically, ensuring it stays within viewport
+      let left = (viewportWidth - modalWidth) / 2;
+      let top = (viewportHeight - modalHeight) / 2;
+      
+      // Ensure within bounds
+      left = Math.max(padding, Math.min(left, viewportWidth - modalWidth - padding));
+      top = Math.max(padding, Math.min(top, viewportHeight - modalHeight - padding));
+      
+      return {
+        top: `${top}px`,
+        left: `${left}px`,
+      };
+    }
+
+    if (!triggerPosition) {
+      // Default to center if no trigger position
+      let left = (viewportWidth - modalWidth) / 2;
+      let top = (viewportHeight - modalHeight) / 2;
+      
+      left = Math.max(padding, Math.min(left, viewportWidth - modalWidth - padding));
+      top = Math.max(padding, Math.min(top, viewportHeight - modalHeight - padding));
+      
+      return {
+        top: `${top}px`,
+        left: `${left}px`,
+      };
+    }
 
     let top = triggerPosition.y + 8; // 8px below trigger
     let left = triggerPosition.x - modalWidth / 2; // Center under trigger
@@ -113,13 +144,19 @@ export function BrowserModal({
     };
   };
 
+  // Track fullscreen state changes
+  useEffect(() => {
+    wasFullscreen.current = isFullscreen;
+  }, [isFullscreen]);
+
   // Drag constraints for non-fullscreen mode
   const getDragConstraints = () => {
-    if (isFullscreen || !triggerPosition) return undefined;
+    if (isFullscreen) return undefined;
     
     // Modal dimensions
     const modalWidth = 600;
     const modalHeight = 500;
+    const padding = 16;
     
     // Get viewport dimensions
     const viewportWidth = typeof window !== 'undefined' ? window.innerWidth : 1920;
@@ -131,15 +168,12 @@ export function BrowserModal({
     const initialTop = parseInt(initialPos.top || '0');
     
     // Calculate how far the modal can move from its initial position
-    // left: how far left it can move (to reach viewport left edge)
-    // right: how far right it can move (to reach viewport right edge)
-    // top: how far up it can move (to reach viewport top)
-    // bottom: how far down it can move (to reach viewport bottom)
+    // Constrain so modal always stays fully within viewport with padding
     return {
-      left: -initialLeft, // Move left until modal left edge hits viewport left (0)
-      right: viewportWidth - modalWidth - initialLeft, // Move right until modal right edge hits viewport right
-      top: -initialTop, // Move up until modal top edge hits viewport top (0)
-      bottom: viewportHeight - modalHeight - initialTop, // Move down until modal bottom edge hits viewport bottom
+      left: -(initialLeft - padding), // Can move left until padding from left edge
+      right: viewportWidth - modalWidth - initialLeft - padding, // Can move right until padding from right edge
+      top: -(initialTop - padding), // Can move up until padding from top
+      bottom: viewportHeight - modalHeight - initialTop - padding, // Can move down until padding from bottom
     };
   };
 
@@ -147,6 +181,7 @@ export function BrowserModal({
     <AnimatePresence>
       {/* Modal/Popover - No backdrop, draggable in non-fullscreen */}
       <motion.div
+        key={isFullscreen ? 'fullscreen' : 'windowed'} // Force remount on fullscreen toggle to reset drag state
         initial={{ opacity: 0, scale: 0.95, ...(isFullscreen ? {} : getPopoverPosition()) }}
         animate={{ 
           opacity: 1, 
@@ -156,7 +191,11 @@ export function BrowserModal({
             left: '50%',
             x: '-50%',
             y: '-50%'
-          } : {})
+          } : {
+            ...getPopoverPosition(),
+            x: 0,
+            y: 0
+          })
         }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ duration: 0.2 }}
@@ -170,7 +209,6 @@ export function BrowserModal({
             : 'w-[600px] h-[500px]'
         }`}
         style={!isFullscreen ? { 
-          ...getPopoverPosition(),
           cursor: 'move'
         } : {
           cursor: 'default'

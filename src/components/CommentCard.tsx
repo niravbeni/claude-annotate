@@ -60,14 +60,14 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
       </div>
 
       {/* Text Snippet */}
-      <div className="text-claude-body-small text-gray-700 mb-2 italic border-l-2 border-gray-300 pl-2">
+      <div className="text-claude-body-small text-gray-700 mb-2 italic border-l-2 border-gray-300 pl-2 break-words overflow-hidden">
         "{annotation.annotatedText.substring(0, 80)}
         {annotation.annotatedText.length > 80 ? '...' : ''}"
       </div>
 
       {/* Comment Body */}
       <div
-        className={`text-ui-body-small text-gray-800 leading-relaxed ${
+        className={`text-ui-body-small text-gray-800 leading-relaxed break-words overflow-hidden ${
           annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
         }`}
         dangerouslySetInnerHTML={{

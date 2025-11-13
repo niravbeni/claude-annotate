@@ -40,8 +40,8 @@ export const ANIMATIONS = {
 };
 
 export const LIMITS = {
-  maxCharacters: 5000,
-  warnAtCharacters: 4500,
+  maxCharacters: 1080,
+  warnAtCharacters: 1080,
   apiTimeoutSeconds: 30,
   maxCommentLength: 500,
 };
@@ -52,7 +52,7 @@ export const ERROR_MESSAGES = {
   RATE_LIMIT: 'Too many requests. Please wait a moment and try again.',
   NETWORK_ERROR: 'Connection failed. Please check your internet and try again.',
   INVALID_RESPONSE: 'Received unexpected response from Claude. Please try again.',
-  TEXT_TOO_LONG: 'Text exceeds 5,000 character limit.',
+  TEXT_TOO_LONG: 'Text exceeds 1,080 character limit.',
   TEXT_EMPTY: 'Please enter some text to analyze.',
   UNKNOWN: 'An error occurred. Please try again.',
 };
