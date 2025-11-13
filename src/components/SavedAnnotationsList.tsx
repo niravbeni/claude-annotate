@@ -40,9 +40,9 @@ export function SavedAnnotationsList() {
   };
 
   const handleClearAll = () => {
-    // Delete all saved annotations one by one (in reverse to avoid index shifting)
-    for (let i = savedAnnotations.length - 1; i >= 0; i--) {
-      deleteSavedAnnotation(i);
+      // Delete all saved annotations one by one (in reverse to avoid index shifting)
+      for (let i = savedAnnotations.length - 1; i >= 0; i--) {
+        deleteSavedAnnotation(i);
     }
   };
 
@@ -115,7 +115,7 @@ export function SavedAnnotationsList() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      deleteSavedAnnotation(index);
+                        deleteSavedAnnotation(index);
                     }}
                     className="p-2 min-w-[32px] min-h-[32px] hover:bg-red-50 active:bg-red-100 rounded-lg transition-all cursor-pointer flex items-center justify-center"
                     aria-label="Delete"
@@ -133,14 +133,14 @@ export function SavedAnnotationsList() {
 
               {/* Comment */}
               <div className="flex items-start gap-2 mb-2">
-                <div 
+              <div 
                   className={`text-ui-body-small text-gray-800 break-words flex-1 ${
-                    saved.annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
-                  }`}
-                  dangerouslySetInnerHTML={{
-                    __html: formatComment(saved.annotation.comment),
-                  }}
-                />
+                  saved.annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
+                }`}
+                dangerouslySetInnerHTML={{
+                  __html: formatComment(saved.annotation.comment),
+                }}
+              />
                 {saved.annotation.browserReference && (
                   <button
                     onClick={(e) => {

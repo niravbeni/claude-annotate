@@ -67,14 +67,14 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
 
       {/* Comment Body */}
       <div className="flex items-start gap-2">
-        <div
+      <div
           className={`text-ui-body-small text-gray-800 leading-relaxed break-words flex-1 ${
-            annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
-          }`}
-          dangerouslySetInnerHTML={{
-            __html: formatComment(annotation.comment),
-          }}
-        />
+          annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
+        }`}
+        dangerouslySetInnerHTML={{
+          __html: formatComment(annotation.comment),
+        }}
+      />
         {annotation.browserReference && onReferenceClick && (
           <button
             onClick={(e) => {

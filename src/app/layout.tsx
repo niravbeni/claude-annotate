@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
+import { PlaybackProvider } from "@/lib/playback/PlaybackContext";
+import { AnimatedCursor } from "@/components/playback/AnimatedCursor";
+import { PlaybackController } from "@/components/playback/PlaybackController";
 
 // Anthropic Sans - for UI elements
 const anthropicSans = localFont({
@@ -57,8 +60,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${anthropicSans.variable} ${anthropicSerif.variable} ${jetbrainsMono.variable} antialiased`}>
+        <PlaybackProvider>
+          <AnimatedCursor />
+          <PlaybackController />
         {children}
         <Toaster />
+        </PlaybackProvider>
       </body>
     </html>
   );

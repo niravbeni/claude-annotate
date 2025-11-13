@@ -16,6 +16,8 @@ export function BrowserModal({
   const [isLoading, setIsLoading] = useState(true);
   const [iframeKey, setIframeKey] = useState(0);
   const wasFullscreen = useRef(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const contentDivRef = useRef<HTMLDivElement>(null);
 
   // Check if site is likely to block iframes on mount
   useEffect(() => {
@@ -149,6 +151,44 @@ export function BrowserModal({
     wasFullscreen.current = isFullscreen;
   }, [isFullscreen]);
 
+  // Handle wheel events for scrolling - listen on both content div and iframe
+  useEffect(() => {
+    const contentDiv = contentDivRef.current;
+    const iframe = iframeRef.current;
+    if (!contentDiv) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      // Try to scroll the iframe content
+      if (iframe && iframe.contentWindow) {
+        try {
+          // Scroll the iframe's content window
+          iframe.contentWindow.scrollBy({
+            top: e.deltaY,
+            behavior: 'auto'
+          });
+        } catch (error) {
+          // Cross-origin, can't control iframe scroll
+          console.log('Cannot scroll cross-origin iframe', error);
+        }
+      }
+    };
+
+    // Listen on content div
+    contentDiv.addEventListener('wheel', handleWheel, { passive: true });
+    
+    // Also listen directly on iframe if possible
+    if (iframe) {
+      iframe.addEventListener('wheel', handleWheel, { passive: true });
+    }
+
+    return () => {
+      contentDiv.removeEventListener('wheel', handleWheel);
+      if (iframe) {
+        iframe.removeEventListener('wheel', handleWheel);
+      }
+    };
+  }, []);
+
   // Drag constraints for non-fullscreen mode
   const getDragConstraints = () => {
     if (isFullscreen) return undefined;
@@ -262,7 +302,10 @@ export function BrowserModal({
           </div>
 
           {/* Browser Content - Iframe only, no banner */}
-          <div className="h-[calc(100%-56px)] bg-white relative">
+          <div 
+            ref={contentDivRef}
+            className="h-[calc(100%-56px)] bg-white relative overflow-hidden"
+          >
             {iframeError ? (
               <div className="flex items-center justify-center h-full p-8">
                 <div className="max-w-md">
@@ -304,10 +347,11 @@ export function BrowserModal({
                   </div>
                 )}
                 <iframe
+                  ref={iframeRef}
                   key={iframeKey}
                   id="browser-modal-title"
                   src={reference.sourceUrl}
-                  className="w-full h-full border-0"
+                  className="w-full h-full border-0 overflow-auto"
                   sandbox="allow-scripts allow-same-origin allow-popups allow-forms"
                   title={reference.sourceTitle}
                   onLoad={() => setIsLoading(false)}

@@ -110,14 +110,14 @@ export function AnnotationCarousel() {
 
         {/* Comment */}
         <div className="flex items-start gap-2 mb-3">
-          <div
+        <div
             className={`text-ui-body-small text-gray-800 leading-relaxed break-words flex-1 ${
-              activeAnnotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
-            }`}
-            dangerouslySetInnerHTML={{
-              __html: formatComment(activeAnnotation.comment),
-            }}
-          />
+            activeAnnotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
+          }`}
+          dangerouslySetInnerHTML={{
+            __html: formatComment(activeAnnotation.comment),
+          }}
+        />
           {activeAnnotation.browserReference && (
             <button
               onClick={(e) => {

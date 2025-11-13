@@ -154,10 +154,10 @@ export function TextEditor() {
   const isOverLimit = charCount > LIMITS.maxCharacters;
 
   return (
-    <div className="relative h-full flex flex-col">
+    <div className="relative h-full flex flex-col overflow-hidden">
       {/* Text Content */}
-      <div className="h-[calc(100vh-80px)] px-8 pt-6 pb-6" style={{ backgroundColor: '#FAF9F5' }}>
-        <div className="relative max-w-[700px] mx-auto h-full flex flex-col">
+      <div className="h-[calc(100vh-80px)] px-8 pt-6 pb-6 overflow-hidden" style={{ backgroundColor: '#FAF9F5' }}>
+        <div className="relative max-w-[700px] mx-auto h-full flex flex-col overflow-hidden">
           {/* Controls Bar - Above Text Box */}
           <div className="pb-2 flex items-center justify-between">
             {/* Left: Show Annotations Toggle */}
@@ -267,12 +267,12 @@ export function TextEditor() {
                       setText(e.target.value);
                     }
                   }}
-                  className="w-full flex-1 px-[56px] py-4 pt-[88px] pb-16 editor-text border rounded-lg bg-white resize-none focus:outline-none focus:ring-2 focus:ring-[#C6613F]"
+                  className="w-full flex-1 px-[56px] py-4 pt-[88px] pb-16 editor-text border-2 border-gray-200 rounded-lg bg-white resize-none focus:outline-none focus:border-[#C6613F]"
                   style={{
                     cursor: 'text',
                     overflow: 'hidden',
                   }}
-                  placeholder="Paste your text here..."
+                  placeholder="Write your text here..."
                   disabled={isAnalyzing}
                 />
                 

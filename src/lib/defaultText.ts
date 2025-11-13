@@ -9,7 +9,7 @@
  * You can also copy content from: /content/default-text.md
  */
 
-export const DEFAULT_TEXT = `My grandmother arrived in London in 1952, carrying nothing but a worn leather suitcase and her mother's gold cross. She was seventeen, barely spoke English, and knew no one.
+export const DEFAULT_TEXT = `My grandmother arrived in London in 1972, carrying nothing but a worn leather suitcase and her mother's gold cross. She was seventeen, barely spoke English, and knew no one.
 
 The boarding house on Kentish Town Road smelled of boiled cabbage and damp wool. Nonna would lie awake at night listening to unfamiliar sounds - the rumble of the Northern Line beneath the floorboards, voices speaking a language that felt like stones in her mouth. Fear lived in her chest then, a hard knot just below her ribs that made breathing deliberate work.
 

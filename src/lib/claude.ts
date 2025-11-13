@@ -68,7 +68,7 @@ CRITICAL RULES FOR BOUNDARIES (READ CAREFULLY):
    - ABSOLUTE MAXIMUM: 5 words, but prefer 1-2 words
    - Your COMMENT must be detailed and explain BOTH pieces of conflicting information with specific details
    - Example: Circle "1954" NOT "By 1954, she'd found work"
-   - Example: Circle "1992" NOT "arrived in London in 1992"  
+   - Example: Circle "1992" NOT "arrived in London in 1992"
    - Example: Circle "1972" if it conflicts with "1954" later - then explain: "text states arrival in 1972, but mentions working at factory in 1954 (18 years before arrival)"
 
 3. NEVER CROSS PARAGRAPHS:
