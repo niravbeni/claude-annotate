@@ -34,15 +34,15 @@ export function CommentSidebar() {
           </button>
           <button
             onClick={() => setActiveTab('history')}
-            className={`px-2 pb-3 text-ui-body-small-bold transition-all cursor-pointer relative flex items-center ${
+            className={`px-2 pb-3 text-ui-body-small-bold transition-all cursor-pointer relative flex items-center gap-2 ${
               activeTab === 'history'
                 ? 'text-[#1F1E1D]'
                 : 'text-gray-500 hover:text-gray-700'
             }`}
           >
-            Saved
+            <span>Saved</span>
             {savedAnnotations.length > 0 && (
-              <span className="ml-2 px-2 py-0.5 bg-[#C6613F] text-white text-ui-body-extra-small rounded-full">
+              <span className="min-w-[20px] h-[20px] bg-[#C6613F] text-white text-ui-body-extra-small rounded-full inline-flex items-center justify-center" style={{ lineHeight: '1', padding: '0 5px' }}>
                 {savedAnnotations.length}
               </span>
             )}

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAppStore } from '@/lib/store';
-import { Heart, Waves, CircleAlert, Star, ChevronLeft, ChevronRight, Pin } from 'lucide-react';
+import { Heart, Waves, CircleAlert, Star, ChevronLeft, ChevronRight, Pin, Globe } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useMemo } from 'react';
 
@@ -14,6 +14,7 @@ export function AnnotationCarousel() {
     saveAnnotationWithChat,
     cycleOverlappingAnnotation,
     savedAnnotations,
+    openBrowserModal,
   } = useAppStore();
 
   // Get the active annotation (pinned takes priority over hovered)
@@ -108,14 +109,32 @@ export function AnnotationCarousel() {
         </div>
 
         {/* Comment */}
-        <div
-          className={`text-ui-body-small text-gray-800 leading-relaxed mb-3 break-words overflow-hidden ${
-            activeAnnotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
-          }`}
-          dangerouslySetInnerHTML={{
-            __html: formatComment(activeAnnotation.comment),
-          }}
-        />
+        <div className="flex items-start gap-2 mb-3">
+          <div
+            className={`text-ui-body-small text-gray-800 leading-relaxed break-words flex-1 ${
+              activeAnnotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
+            }`}
+            dangerouslySetInnerHTML={{
+              __html: formatComment(activeAnnotation.comment),
+            }}
+          />
+          {activeAnnotation.browserReference && (
+            <button
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                openBrowserModal(activeAnnotation.browserReference!, {
+                  x: rect.left + rect.width / 2,
+                  y: rect.bottom
+                });
+              }}
+              className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors cursor-pointer"
+              aria-label="View reference"
+              title="View reference"
+            >
+              <Globe className="h-3 w-3" strokeWidth={2.5} style={{ color: 'white', stroke: 'white', fill: 'none' }} />
+            </button>
+          )}
+        </div>
 
         {/* Bottom Row - Pinned Icon (left) and Carousel Navigation (right) */}
         <div className="flex items-center justify-between">

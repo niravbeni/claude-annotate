@@ -1,14 +1,14 @@
 'use client';
 
 import { useAppStore } from '@/lib/store';
-import { Heart, Waves, CircleAlert, Trash2, MessageSquare, ChevronDown, ChevronUp } from 'lucide-react';
+import { Heart, Waves, CircleAlert, Trash2, MessageSquare, ChevronDown, ChevronUp, Globe } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useState } from 'react';
 import { ChatMessage } from './ChatMessage';
 
 export function SavedAnnotationsList() {
-  const { savedAnnotations, loadSavedAnnotation, deleteSavedAnnotation } = useAppStore();
+  const { savedAnnotations, loadSavedAnnotation, deleteSavedAnnotation, openBrowserModal } = useAppStore();
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   const getIcon = (type: string) => {
@@ -40,11 +40,9 @@ export function SavedAnnotationsList() {
   };
 
   const handleClearAll = () => {
-    if (confirm('Delete all saved annotations?')) {
-      // Delete all saved annotations one by one (in reverse to avoid index shifting)
-      for (let i = savedAnnotations.length - 1; i >= 0; i--) {
-        deleteSavedAnnotation(i);
-      }
+    // Delete all saved annotations one by one (in reverse to avoid index shifting)
+    for (let i = savedAnnotations.length - 1; i >= 0; i--) {
+      deleteSavedAnnotation(i);
     }
   };
 
@@ -117,9 +115,7 @@ export function SavedAnnotationsList() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (confirm('Delete this saved annotation?')) {
-                        deleteSavedAnnotation(index);
-                      }
+                      deleteSavedAnnotation(index);
                     }}
                     className="p-2 min-w-[32px] min-h-[32px] hover:bg-red-50 active:bg-red-100 rounded-lg transition-all cursor-pointer flex items-center justify-center"
                     aria-label="Delete"
@@ -136,14 +132,33 @@ export function SavedAnnotationsList() {
               </div>
 
               {/* Comment */}
-              <div 
-                className={`text-ui-body-small text-gray-800 mb-2 break-words overflow-hidden ${
-                  saved.annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
-                }`}
-                dangerouslySetInnerHTML={{
-                  __html: formatComment(saved.annotation.comment),
-                }}
-              />
+              <div className="flex items-start gap-2 mb-2">
+                <div 
+                  className={`text-ui-body-small text-gray-800 break-words flex-1 ${
+                    saved.annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
+                  }`}
+                  dangerouslySetInnerHTML={{
+                    __html: formatComment(saved.annotation.comment),
+                  }}
+                />
+                {saved.annotation.browserReference && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      openBrowserModal(saved.annotation.browserReference!, {
+                        x: rect.left + rect.width / 2,
+                        y: rect.bottom
+                      });
+                    }}
+                    className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors cursor-pointer"
+                    aria-label="View reference"
+                    title="View reference"
+                  >
+                    <Globe className="h-3 w-3" strokeWidth={2.5} style={{ color: 'white', stroke: 'white', fill: 'none' }} />
+                  </button>
+                )}
+              </div>
 
               {/* Saved timestamp */}
               <p className="text-ui-body-extra-small text-gray-400">

@@ -200,7 +200,7 @@ export function TextEditor() {
             <>
               {/* Annotated Text inside textbox outline */}
               <div className="w-full flex-1 px-[56px] py-4 pt-[96px] pb-24 border rounded-lg bg-white overflow-hidden relative">
-                <AnnotatedText />
+                <AnnotatedText showTooltips={false} />
                 
                 {/* Claude Icon - top left */}
                 <div className="absolute top-3 left-3 z-10">

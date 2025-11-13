@@ -1,7 +1,7 @@
 'use client';
 
 import { format } from 'date-fns';
-import { Heart, CircleAlert, Waves, X, Star } from 'lucide-react';
+import { Heart, CircleAlert, Waves, X, Star, Globe } from 'lucide-react';
 import { CommentCardProps } from '@/types';
 import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
@@ -66,14 +66,32 @@ const CommentCardComponent = ({ annotation, onReferenceClick }: CommentCardProps
       </div>
 
       {/* Comment Body */}
-      <div
-        className={`text-ui-body-small text-gray-800 leading-relaxed break-words overflow-hidden ${
-          annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
-        }`}
-        dangerouslySetInnerHTML={{
-          __html: formatComment(annotation.comment),
-        }}
-      />
+      <div className="flex items-start gap-2">
+        <div
+          className={`text-ui-body-small text-gray-800 leading-relaxed break-words flex-1 ${
+            annotation.certainty === 'uncertain' ? 'uncertain-comment' : ''
+          }`}
+          dangerouslySetInnerHTML={{
+            __html: formatComment(annotation.comment),
+          }}
+        />
+        {annotation.browserReference && onReferenceClick && (
+          <button
+            onClick={(e) => {
+              const rect = e.currentTarget.getBoundingClientRect();
+              onReferenceClick(annotation.browserReference!, {
+                x: rect.left + rect.width / 2,
+                y: rect.bottom
+              });
+            }}
+            className="flex-shrink-0 inline-flex items-center justify-center w-5 h-5 rounded-full bg-[#C6613F] hover:bg-[#B35635] transition-colors cursor-pointer"
+            aria-label="View reference"
+            title="View reference"
+          >
+            <Globe className="h-3 w-3" strokeWidth={2.5} style={{ color: 'white', stroke: 'white', fill: 'none' }} />
+          </button>
+        )}
+      </div>
 
       {/* Action Buttons Row - Reference Button + Star + Cross */}
       <div className="flex items-center justify-between gap-2 mt-3">

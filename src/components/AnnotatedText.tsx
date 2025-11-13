@@ -434,15 +434,16 @@ const AnnotatedTextComponent = ({ showTooltips = true }: AnnotatedTextProps) => 
               e.stopPropagation();
               // Toggle pin: if already pinned, unpin; otherwise pin
               if (segment.annotations.length > 0) {
-                const { pinnedAnnotationId, activeAnnotationId } = useAppStore.getState();
-                // Use the active annotation ID if available, otherwise use the first one
-                const targetAnnotationId = activeAnnotationId || segment.annotations[0].id;
+                const { pinnedAnnotationId } = useAppStore.getState();
+                // Always use the first annotation in this segment as the target
+                const targetAnnotationId = segment.annotations[0].id;
                 
                 if (pinnedAnnotationId === targetAnnotationId) {
-                  // Unpin if clicking the same annotation
+                  // Unpin if clicking the same annotation, but keep it active since we're hovering
                   setPinnedAnnotation(null);
+                  setActiveAnnotation(targetAnnotationId, segment.annotations.map(a => a.id));
                 } else {
-                  // Pin the annotation with all overlapping annotations
+                  // Pin the new annotation with all overlapping annotations
                   setPinnedAnnotation(targetAnnotationId, segment.annotations.map(a => a.id));
                 }
               }
