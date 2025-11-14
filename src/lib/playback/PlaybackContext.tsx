@@ -16,13 +16,18 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
   const [isPlaybackActive, setIsPlaybackActive] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
-  // Check if we should auto-start playback after reload
+  // Check if we should auto-start playback after reload (only if in loop, not on first load)
   useEffect(() => {
     const shouldAutoStart = sessionStorage.getItem('playbackActive') === 'true';
-    if (shouldAutoStart) {
-      console.log('[Playback] Auto-starting after reload');
+    const isInLoop = sessionStorage.getItem('playbackInLoop') === 'true';
+    if (shouldAutoStart && isInLoop) {
+      console.log('[Playback] Auto-starting after reload (in loop)');
       setIsPlaybackActive(true);
       setCurrentStep(1);
+    } else if (shouldAutoStart && !isInLoop) {
+      // Clean up stale sessionStorage if not in loop
+      console.log('[Playback] Cleaning up stale playback session');
+      sessionStorage.removeItem('playbackActive');
     }
   }, []);
 
@@ -31,6 +36,7 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
       // Stop playback and reload page to reset everything
       console.log('[Playback] Stopping playback and reloading page');
       sessionStorage.removeItem('playbackActive');
+      sessionStorage.removeItem('playbackInLoop');
       window.location.reload();
     } else {
       // Start playback and mark in session storage

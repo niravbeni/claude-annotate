@@ -408,12 +408,9 @@
   font-size: 13px;
 }
 
-/* Uncertain comments - grey squiggly underline */
+/* Uncertain comments - italicize when Claude is unsure */
 .uncertain-comment {
-  text-decoration: underline wavy #6B7280;
-  text-decoration-thickness: 1px;
-  text-underline-offset: 2px;
-  text-decoration-skip-ink: none;
+  font-style: italic;
 }
 
 /* Lighter bold text in tooltips and history cards */

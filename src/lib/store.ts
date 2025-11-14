@@ -319,5 +319,84 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       savedAnnotations: state.savedAnnotations.filter((_, i) => i !== index),
     })),
+
+  // Apply alternative text to replace the annotated text in the editor
+  applyAlternativeText: (annotationId, newText) =>
+    set((state) => {
+      // Find the annotation
+      const annotation = state.annotations.find(a => a.id === annotationId);
+      if (!annotation) {
+        console.error('[applyAlternativeText] Annotation not found:', annotationId);
+        return state;
+      }
+
+      // Find the actual location of the annotatedText in the current text
+      // (indices might be wrong, so we search for the text itself)
+      const annotatedText = annotation.annotatedText;
+      const actualStartIndex = state.text.indexOf(annotatedText);
+      
+      if (actualStartIndex === -1) {
+        console.error('[applyAlternativeText] Could not find annotated text in document:', annotatedText);
+        return state;
+      }
+      
+      const actualEndIndex = actualStartIndex + annotatedText.length;
+      
+      console.log('[applyAlternativeText] Replacing:', {
+        annotationId,
+        originalIndices: { start: annotation.startIndex, end: annotation.endIndex },
+        actualIndices: { start: actualStartIndex, end: actualEndIndex },
+        annotatedText,
+        textAtOriginalIndices: state.text.substring(annotation.startIndex, annotation.endIndex),
+        textAtActualIndices: state.text.substring(actualStartIndex, actualEndIndex),
+        newText,
+        fullTextLength: state.text.length
+      });
+      
+      const updatedText = state.text.substring(0, actualStartIndex) + newText + state.text.substring(actualEndIndex);
+      
+      // Track in edit history
+      const newHistory = [state.text, ...state.textEditHistory].slice(0, 10);
+      
+      // Calculate the new endIndex for the annotation after replacement
+      const lengthDiff = newText.length - (actualEndIndex - actualStartIndex);
+      
+      // Update the annotation with new text and indices
+      const updatedAnnotations = state.annotations.map(ann => {
+        if (ann.id === annotationId) {
+          // Update this annotation
+          return {
+            ...ann,
+            annotatedText: newText,
+            startIndex: actualStartIndex,
+            endIndex: actualStartIndex + newText.length,
+          };
+        } else if (ann.startIndex >= actualEndIndex) {
+          // Shift annotations that come after this one
+          return {
+            ...ann,
+            startIndex: ann.startIndex + lengthDiff,
+            endIndex: ann.endIndex + lengthDiff,
+          };
+        }
+        return ann;
+      });
+
+      return {
+        text: updatedText,
+        textEditHistory: newHistory,
+        annotations: updatedAnnotations,
+        isEditing: true,
+      };
+    }),
+    
+  // Update alternatives for an annotation
+  updateAnnotationAlternatives: (annotationId, alternatives, alternativeStyles) => set((state) => ({
+    annotations: state.annotations.map(ann =>
+      ann.id === annotationId
+        ? { ...ann, alternatives, alternativeStyles }
+        : ann
+    ),
+  })),
 }));
 

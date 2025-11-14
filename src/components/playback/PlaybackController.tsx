@@ -150,15 +150,15 @@ export function PlaybackController() {
   };
 
   const executeTypeText = async (step: any) => {
-    // Clear existing text first
-    setText('');
-    await sleep(300);
-
     const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
     if (!textarea) {
       console.error('[Playback] Textarea not found');
       return;
     }
+
+    // Clear existing text first
+    setText('');
+    await sleep(300);
 
     await moveCursorTo(textarea);
     textarea.focus();
@@ -720,6 +720,9 @@ export function PlaybackController() {
   const executeRestart = async () => {
     console.log('[Playback] Restarting loop - clearing text and reloading...');
     await sleep(2000); // Brief pause before restarting
+    
+    // Mark that we're in a loop so the next page load auto-starts
+    sessionStorage.setItem('playbackInLoop', 'true');
     
     // Clear the text immediately to prevent glitch on reload
     setText('');

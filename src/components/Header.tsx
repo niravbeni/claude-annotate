@@ -11,7 +11,8 @@ export function Header() {
       <div className="flex items-center justify-between">
         <button 
           onClick={() => window.location.reload()}
-          className="text-ui-title text-gray-900 cursor-pointer hover:opacity-80 transition-opacity"
+          className="text-gray-900 cursor-pointer hover:opacity-80 transition-opacity"
+          style={{ fontSize: '36px', fontWeight: 450, fontFamily: 'var(--font-serif)', letterSpacing: '-0.02em' }}
           aria-label="Refresh page"
         >
           Claude

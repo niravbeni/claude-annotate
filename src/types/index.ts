@@ -19,6 +19,9 @@ export interface Annotation {
   browserReference: BrowserReference | null;
   timestamp: Date; // Generated client-side
   bookmarked?: boolean; // Optional bookmark flag
+  alternatives?: string[]; // Array of 2-3 alternative phrasings for uncertainty annotations
+  alternativeStyles?: string[]; // Style tags for each alternative (e.g., "Orwellian", "Kafkaesque")
+  editorSuggestion?: string; // Randomized suggestion text like "I think this sentence could benefit from a rephrasing"
 }
 
 // Zustand store shape
@@ -71,11 +74,17 @@ export interface AppState {
   closeBrowserModal: () => void;
   toggleBrowserFullscreen: () => void;
   
+  // Alternative text actions
+  applyAlternativeText: (annotationId: string, newText: string) => void;
+  
   // Legacy actions (for backward compatibility)
   resetToDefault: () => void;
   deleteAnnotationFromHistory: (id: string) => void;
   toggleBookmarkAnnotation: (id: string) => void;
   clearHistory: () => void;
+  
+  // Update alternatives
+  updateAnnotationAlternatives: (annotationId: string, alternatives: string[], alternativeStyles?: string[]) => void;
 }
 
 // Component props interfaces

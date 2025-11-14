@@ -279,18 +279,18 @@ export function BrowserModal({
               </button>
             </div>
 
-            {/* URL Bar */}
-            <div className="flex-1 bg-white rounded-md px-3 py-1.5 flex items-center gap-2 border border-gray-200">
-              <div className="w-3 h-3 rounded-full bg-green-500" />
+            {/* URL Bar - with max width to prevent pushing fullscreen button off */}
+            <div className="flex-1 min-w-0 bg-white rounded-md px-3 py-1.5 flex items-center gap-2 border border-gray-200">
+              <div className="w-3 h-3 rounded-full bg-green-500 flex-shrink-0" />
               <span className="text-ui-body-small text-gray-700 truncate">
                 {reference.sourceUrl}
               </span>
             </div>
 
-            {/* Fullscreen Button - Right */}
+            {/* Fullscreen Button - Right - Always visible */}
             <button
               onClick={onToggleFullscreen}
-              className="p-1.5 rounded-full hover:bg-gray-200 transition-colors cursor-pointer outline-none focus:outline-none"
+              className="p-1.5 rounded-full hover:bg-gray-200 transition-colors cursor-pointer outline-none focus:outline-none flex-shrink-0"
               aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
             >
               {isFullscreen ? (
