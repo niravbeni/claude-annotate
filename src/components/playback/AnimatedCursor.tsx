@@ -18,8 +18,8 @@ export function AnimatedCursor() {
   useEffect(() => {
     if (isPlaybackActive) {
       setIsVisible(true);
-      // Start cursor near center
-      setPosition({ x: window.innerWidth / 2, y: window.innerHeight / 2 });
+      // Start cursor near top of document area
+      setPosition({ x: window.innerWidth * 0.4, y: window.innerHeight * 0.25 });
     } else {
       setIsVisible(false);
       setPosition({ x: -100, y: -100 });

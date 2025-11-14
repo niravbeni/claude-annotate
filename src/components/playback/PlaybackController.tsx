@@ -41,6 +41,22 @@ export function PlaybackController() {
           case 'wait':
             // Just wait, already handled by delay
             break;
+          case 'moveCursorToTop':
+            // Move cursor to top of page
+            cursorPosRef.current.x = window.innerWidth * 0.3;
+            cursorPosRef.current.y = window.innerHeight * 0.2;
+            window.dispatchEvent(new CustomEvent('playback:moveCursor', {
+              detail: { x: cursorPosRef.current.x, y: cursorPosRef.current.y }
+            }));
+            break;
+          case 'moveCursorToStart':
+            // Move cursor back to initial start position
+            cursorPosRef.current.x = window.innerWidth * 0.4;
+            cursorPosRef.current.y = window.innerHeight * 0.25;
+            window.dispatchEvent(new CustomEvent('playback:moveCursor', {
+              detail: { x: cursorPosRef.current.x, y: cursorPosRef.current.y }
+            }));
+            break;
           case 'waitForAnalysis':
             await executeWaitForAnalysis();
             break;
@@ -88,18 +104,73 @@ export function PlaybackController() {
 
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
-  const moveCursorTo = async (element: Element, triggerHover = false) => {
+  // Track cursor position for smooth arced movements using refs
+  const cursorPosRef = useRef({
+    x: typeof window !== 'undefined' ? window.innerWidth * 0.4 : 0,
+    y: typeof window !== 'undefined' ? window.innerHeight * 0.25 : 0
+  });
+
+  const moveCursorTo = async (element: Element, triggerHover = false, withArc = false) => {
     const rect = element.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
+    const targetX = rect.left + rect.width / 2;
+    const targetY = rect.top + rect.height / 2;
 
-    console.log('[Playback] Moving cursor to:', { x, y, element: element.tagName });
+    console.log('[Playback] Moving cursor to:', { x: targetX, y: targetY, element: element.tagName, withArc });
 
-    window.dispatchEvent(new CustomEvent('playback:moveCursor', {
-      detail: { x, y }
-    }));
-
-    await sleep(CURSOR_SPEED);
+    // If withArc is true and we're moving down, add a curved arc animation
+    if (withArc && targetY > cursorPosRef.current.y) {
+      console.log('[Playback] Using DRAMATIC arc motion from', cursorPosRef.current, 'to', { targetX, targetY });
+      const startX = cursorPosRef.current.x;
+      const startY = cursorPosRef.current.y;
+      const distance = Math.abs(targetY - startY);
+      
+      // Make arc VERY pronounced - 200px fixed arc for maximum visibility
+      const arcSize = 200; // Fixed large arc!
+      const steps = 40; // More steps for ultra-smooth arc
+      
+      console.log('[Playback] Arc size:', arcSize, 'px, steps:', steps, 'duration:', steps * 15, 'ms');
+      
+      for (let step = 0; step <= steps; step++) {
+        const progress = step / steps;
+        
+        // Smooth bezier-like easing
+        const easedProgress = progress < 0.5 
+          ? 2 * progress * progress 
+          : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+        
+        // Vertical movement
+        const currentY = startY + distance * easedProgress;
+        
+        // HUGE rightward arc using sine wave (peaks at 50%)
+        const arcOffset = Math.sin(progress * Math.PI) * arcSize;
+        const currentX = startX + (targetX - startX) * easedProgress + arcOffset;
+        
+        if (step % 8 === 0) {
+          console.log(`[Playback] Arc step ${step}/${steps}: x=${currentX.toFixed(0)}, y=${currentY.toFixed(0)}, offset=${arcOffset.toFixed(0)}`);
+        }
+        
+        window.dispatchEvent(new CustomEvent('playback:moveCursor', {
+          detail: { x: currentX, y: currentY }
+        }));
+        
+        await sleep(15); // Faster arc - 600ms total
+      }
+      
+      console.log('[Playback] Arc complete! Final position:', { x: targetX, y: targetY });
+      
+      // Update tracked position
+      cursorPosRef.current.x = targetX;
+      cursorPosRef.current.y = targetY;
+    } else {
+      // Instant movement (no arc)
+      window.dispatchEvent(new CustomEvent('playback:moveCursor', {
+        detail: { x: targetX, y: targetY }
+      }));
+      
+      cursorPosRef.current.x = targetX;
+      cursorPosRef.current.y = targetY;
+      await sleep(CURSOR_SPEED);
+    }
     
     // Trigger hover events if requested
     if (triggerHover && element instanceof HTMLElement) {
@@ -150,28 +221,46 @@ export function PlaybackController() {
   };
 
   const executeTypeText = async (step: any) => {
-    const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
+    // Wait for textarea to be available (important after page reload)
+    let textarea = document.querySelector('textarea') as HTMLTextAreaElement;
+    let retries = 0;
+    while (!textarea && retries < 20) {
+      console.log('[Playback] Waiting for textarea to appear...');
+      await sleep(100);
+      textarea = document.querySelector('textarea') as HTMLTextAreaElement;
+      retries++;
+    }
+    
     if (!textarea) {
-      console.error('[Playback] Textarea not found');
+      console.error('[Playback] Textarea not found after waiting');
       return;
     }
+    
+    console.log('[Playback] Textarea found, starting to type');
 
     // Clear existing text first
     setText('');
     await sleep(300);
 
-    await moveCursorTo(textarea);
+    // Get typing start position
+    const rect = textarea.getBoundingClientRect();
+    const startX = rect.left + 56 + 10; // Account for padding
+    let currentY = rect.top + 88 + 10; // Start position with padding
+    
+    // Move cursor directly to typing start position (not center of textarea)
+    window.dispatchEvent(new CustomEvent('playback:moveCursor', {
+      detail: { x: startX, y: currentY }
+    }));
+    await sleep(400);
+    
     textarea.focus();
 
     // Type character by character with human-like pauses and cursor tracking
     const text = step.content || '';
     const baseSpeed = step.typingSpeed || 10;
-    const rect = textarea.getBoundingClientRect();
-    const startX = rect.left + 56 + 10; // Account for padding
-    let currentY = rect.top + 88 + 10; // Start position with padding
     const lineHeight = 27; // Approximate line height based on font size
     let currentLineLength = 0;
-    const maxLineLength = 65; // Approximate characters per line
+    const maxLineLength = 68; // Adjusted for better accuracy in later paragraphs
 
     for (let i = 0; i < text.length; i++) {
       setText(text.substring(0, i + 1));
@@ -192,13 +281,16 @@ export function PlaybackController() {
         }
       }
       
-      // Update cursor position every few characters to follow typing
-      if (i % 5 === 0) {
-        const cursorX = startX + (currentLineLength * 8); // Approximate character width
-        window.dispatchEvent(new CustomEvent('playback:moveCursor', {
-          detail: { x: cursorX, y: currentY }
-        }));
-      }
+          // Update cursor position every few characters to follow typing
+          if (i % 5 === 0) {
+            const typingCursorX = startX + (currentLineLength * 8); // Approximate character width
+            window.dispatchEvent(new CustomEvent('playback:moveCursor', {
+              detail: { x: typingCursorX, y: currentY }
+            }));
+            // Update tracked position
+            cursorPosRef.current.x = typingCursorX;
+            cursorPosRef.current.y = currentY;
+          }
       
       // Add random variation and pauses for punctuation
       let delay = baseSpeed;
@@ -224,20 +316,39 @@ export function PlaybackController() {
     const isFastClick = step.findValue === 'Save annotation';
     
     let element: HTMLElement | null = null;
+    let retries = 0;
+    const maxRetries = 20; // Increased for suggestion interactions
 
-    if (step.findBy === 'text') {
-      const elements = Array.from(document.querySelectorAll('button, a, [role="button"]'));
-      element = elements.find(el => 
-        el.textContent?.includes(step.findValue)
-      ) as HTMLElement;
-    } else if (step.findBy === 'ariaLabel') {
-      element = document.querySelector(`[aria-label*="${step.findValue}"]`) as HTMLElement;
-      console.log('[Playback] Found element by aria-label:', element, 'fast:', isFastClick);
-    } else if (step.target) {
-      element = document.querySelector(step.target) as HTMLElement;
+    // Retry finding the element (important after page reload)
+    while (!element && retries < maxRetries) {
+      if (step.findBy === 'text') {
+        const elements = Array.from(document.querySelectorAll('button, a, [role="button"]'));
+        element = elements.find(el => 
+          el.textContent?.includes(step.findValue)
+        ) as HTMLElement;
+      } else if (step.findBy === 'ariaLabel') {
+        element = document.querySelector(`[aria-label*="${step.findValue}"]`) as HTMLElement;
+        
+        // Extra debugging for suggestion interactions
+        if (!element && retries % 5 === 0 && step.findValue?.includes('alternative')) {
+          console.log(`[Playback] Looking for "${step.findValue}" (attempt ${retries + 1}/${maxRetries})`);
+          const allAriaLabels = Array.from(document.querySelectorAll('[aria-label]')).map(el => el.getAttribute('aria-label'));
+          console.log('[Playback] Available aria-labels:', allAriaLabels);
+        }
+      } else if (step.target) {
+        element = document.querySelector(step.target) as HTMLElement;
+      }
+      
+      if (!element && retries < maxRetries - 1) {
+        console.log(`[Playback] Element not found yet, retrying... (${retries + 1}/${maxRetries})`);
+        await sleep(400); // Increased wait time
+      }
+      retries++;
     }
 
     if (element) {
+      console.log('[Playback] Found element by', step.findBy, ':', element, 'fast:', isFastClick);
+      console.log('[Playback] Element tag:', element.tagName, 'aria-label:', element.getAttribute('aria-label'));
       // Check if element is visible and not disabled
       const isVisible = element.offsetParent !== null;
       const isDisabled = element.hasAttribute('disabled');
@@ -258,6 +369,15 @@ export function PlaybackController() {
         target: step.target,
         stepName: step.name
       });
+      // Log all elements with similar aria-labels for debugging
+      if (step.findBy === 'ariaLabel') {
+        const allAriaElements = Array.from(document.querySelectorAll('[aria-label]'));
+        console.log('[Playback] All aria-label elements:', allAriaElements.map(el => ({
+          tag: el.tagName,
+          label: el.getAttribute('aria-label'),
+          visible: (el as HTMLElement).offsetParent !== null
+        })));
+      }
     }
   };
 
@@ -284,34 +404,72 @@ export function PlaybackController() {
   const executeClickAnnotation = async (step: any) => {
     await sleep(500); // Wait for annotations to render
 
-    // Find annotation by text content
-    const annotations = Array.from(document.querySelectorAll('[role="mark"]'));
-    console.log('[Playback] Looking for annotation, found', annotations.length, 'total annotations');
+    // Find annotation by text content with retry logic
+    let annotation: HTMLElement | undefined;
+    let retries = 0;
+    const maxRetries = 15; // Increased retries
     
-    // First, hover over previous annotations to show the active card swapping
-    if (annotations.length > 0) {
-      console.log('[Playback] Hovering over previous annotations first...');
-      // Get first 2-3 annotations to hover over
-      const previewAnnotations = annotations.slice(0, Math.min(3, annotations.length));
-      for (const prevAnn of previewAnnotations) {
-        await moveCursorTo(prevAnn, true); // Enable hover trigger
-        await sleep(800); // Brief pause on each to see the card switch
+    while (!annotation && retries < maxRetries) {
+      const annotations = Array.from(document.querySelectorAll('[role="mark"]'));
+      console.log(`[Playback] Looking for annotation (attempt ${retries + 1}/${maxRetries}), found ${annotations.length} total annotations`);
+      
+      // Log all annotations for debugging
+      if (retries % 3 === 0) {
+        console.log('[Playback] All annotations:', annotations.map(a => a.textContent?.substring(0, 30)));
       }
+      
+      annotation = annotations.find(el => {
+        const matches = el.textContent?.includes(step.findValue);
+        if (matches) {
+          console.log('[Playback] Found matching annotation:', el.textContent?.substring(0, 50));
+        }
+        return matches;
+      }) as HTMLElement;
+      
+      if (!annotation && retries < maxRetries - 1) {
+        console.log('[Playback] Annotation not found yet, waiting...');
+        await sleep(600); // Increased wait time
+      }
+      retries++;
     }
     
-    const annotation = annotations.find(el => {
-      const matches = el.textContent?.includes(step.findValue);
-      if (matches) {
-        console.log('[Playback] Found matching annotation:', el.textContent?.substring(0, 50));
-      }
-      return matches;
-    }) as HTMLElement;
-
     if (annotation) {
+      // Check if we should skip the preview (for re-analysis)
+      if (!step.skipPreview) {
+        // First time: hover over other annotations with zig-zag pattern
+        const allAnnotations = Array.from(document.querySelectorAll('[role="mark"]'));
+        if (allAnnotations.length > 1) {
+          console.log('[Playback] Hovering over other annotations with arc motion...');
+          console.log('[Playback] Current cursor position before preview:', cursorPosRef.current);
+          console.log('[Playback] Total annotations found:', allAnnotations.length);
+          
+          // Find the target annotation index
+          const targetIndex = allAnnotations.indexOf(annotation as Element);
+          console.log('[Playback] Target annotation index:', targetIndex);
+          
+          // Preview annotations UP TO AND INCLUDING the target (up to 3 annotations)
+          const previewCount = Math.min(targetIndex + 1, 3); // Include target in preview
+          console.log('[Playback] Will preview', previewCount, 'annotations (including target)');
+          
+          for (let i = 0; i < previewCount; i++) {
+            const prevAnn = allAnnotations[i];
+            const isTarget = prevAnn === annotation;
+            console.log(`[Playback] Moving to annotation ${i + 1}/${previewCount} with arc`, isTarget ? '(TARGET)' : '');
+            // Move to annotation with arc
+            await moveCursorTo(prevAnn, true, true); // third param = withArc
+            console.log('[Playback] After arc, cursor at:', cursorPosRef.current);
+            await sleep(500); // Reduced pause between annotations
+          }
+        }
+      } else {
+        console.log('[Playback] Skipping annotation preview (re-analysis)');
+      }
+      
       await clickElement(annotation);
     } else {
-      console.error('[Playback] Annotation not found:', step.findValue);
-      console.log('[Playback] Available annotations:', annotations.map(a => a.textContent?.substring(0, 50)));
+      console.error('[Playback] Annotation not found after retries:', step.findValue);
+      const allAnnotations = Array.from(document.querySelectorAll('[role="mark"]'));
+      console.log('[Playback] Available annotations:', allAnnotations.map(a => a.textContent?.substring(0, 50)));
     }
   };
 
@@ -329,57 +487,32 @@ export function PlaybackController() {
         await clickElement(maximizeButton);
         await sleep(1500);
 
-        // Simulate scrolling visually - since iframe scrolling is blocked, just move cursor
+        // Simulate reading the quote at the top of the page
         const iframe = document.querySelector('iframe') as HTMLIFrameElement;
         
         if (iframe) {
-          console.log('[Playback] Simulating browser scroll with cursor movement');
+          console.log('[Playback] Simulating horizontal reading motion at top of iframe');
           
           const iframeRect = iframe.getBoundingClientRect();
-          const centerX = iframeRect.left + iframeRect.width / 2;
-          const startY = iframeRect.top + iframeRect.height * 0.2;
-          const midY = iframeRect.top + iframeRect.height * 0.5;
-          const endY = iframeRect.top + iframeRect.height * 0.8;
+          const topY = iframeRect.top + iframeRect.height * 0.15; // Top portion where quote is
+          const startX = iframeRect.left + iframeRect.width * 0.08; // Start further left
+          const endX = iframeRect.left + iframeRect.width * 0.65; // End more towards left/center
           
-          // Move cursor to start position
-          window.dispatchEvent(new CustomEvent('playback:moveCursor', {
-            detail: { x: centerX, y: startY }
-          }));
-          
-          await sleep(500);
-          
-          // Simulate reading pattern - cursor moves down the page slowly
-          console.log('[Playback] Simulating page reading scroll');
-          for (let i = 0; i <= 20; i++) {
-            const progress = i / 20;
-            const y = startY + (endY - startY) * progress;
-            // Add slight horizontal variation for natural movement
-            const x = centerX + (Math.sin(i * 0.3) * 30);
+          // Move cursor left to right across the top left, simulating reading the quote
+          console.log('[Playback] Reading quote left to right');
+          for (let i = 0; i <= 40; i++) {
+            const progress = i / 40;
+            const x = startX + (endX - startX) * progress;
+            const y = topY + (Math.sin(progress * Math.PI * 2) * 5); // Slight vertical variation for natural feel
             
             window.dispatchEvent(new CustomEvent('playback:moveCursor', {
               detail: { x, y }
             }));
             
-            await sleep(100);
+            await sleep(70);
           }
           
-          await sleep(1000); // Pause to "read"
-          
-          // Scroll back up slightly
-          console.log('[Playback] Scrolling back up');
-          for (let i = 0; i <= 8; i++) {
-            const progress = i / 8;
-            const y = endY - ((endY - midY) * progress);
-            const x = centerX + (Math.sin(i * 0.3) * 30);
-            
-            window.dispatchEvent(new CustomEvent('playback:moveCursor', {
-              detail: { x, y }
-            }));
-            
-            await sleep(80);
-          }
-          
-          await sleep(600); // Final pause
+          await sleep(800); // Pause after reading
         }
 
         // Click close button
@@ -514,12 +647,20 @@ export function PlaybackController() {
       // Find textarea
       const textarea = document.querySelector('textarea') as HTMLTextAreaElement;
       if (textarea) {
-        // Move cursor to textarea
-        await moveCursorTo(textarea);
+        // Calculate position near the Conrad quote (paragraph 3)
+        // The quote is around 600 characters in, which is roughly at line 11-12
+        const rect = textarea.getBoundingClientRect();
+        const clickX = rect.left + rect.width * 0.35; // Slightly left of center
+        const clickY = rect.top + rect.height * 0.48; // About 48% down (near paragraph 3) - adjusted lower
+        
+        // Move cursor to near Conrad quote location
+        window.dispatchEvent(new CustomEvent('playback:moveCursor', {
+          detail: { x: clickX, y: clickY }
+        }));
         await sleep(400);
         
         // Show click animation
-        console.log('[Playback] Clicking textarea to show focus ring');
+        console.log('[Playback] Clicking textarea near Conrad quote');
         window.dispatchEvent(new CustomEvent('playback:click'));
         await sleep(100);
         
@@ -548,7 +689,7 @@ export function PlaybackController() {
         
         // Find the old quote in the text
         const currentText = textarea.value;
-        const oldQuote = 'Fear isn\'t something you think about. It\'s something that thinks you.';
+        const oldQuote = 'In "Under Western Eyes," Joseph Conrad writes: "Words are the great enemies of reality."';
         const newQuote = step.content;
         
         const quoteStartIndex = currentText.indexOf(oldQuote);
@@ -572,7 +713,7 @@ export function PlaybackController() {
           const startX = rect.left + 56 + 10; // Same as initial typing
           const startY = rect.top + 88 + 10; // Same as initial typing
           const lineHeight = 27; // Same as initial typing
-          const maxLineLength = 65; // Same as initial typing
+          const maxLineLength = 68; // Same as initial typing - adjusted for accuracy
           
           // Helper function: calculate Y position for any text position (like initial typing does)
           const getYPosition = (textUpToCursor: string): number => {
@@ -718,17 +859,24 @@ export function PlaybackController() {
   };
 
   const executeRestart = async () => {
-    console.log('[Playback] Restarting loop - clearing text and reloading...');
-    await sleep(2000); // Brief pause before restarting
+    console.log('[Playback] Restarting loop - preparing for seamless reload...');
     
-    // Mark that we're in a loop so the next page load auto-starts
+    // Mark that we're in a loop FIRST
     sessionStorage.setItem('playbackInLoop', 'true');
     
-    // Clear the text immediately to prevent glitch on reload
+    // Clear text before reload to prevent flash
     setText('');
-    await sleep(300); // Brief moment to show cleared state
     
-    // Reload the page for clean restart
+    // Also clear DOM directly for instant visual update
+    const textarea = document.querySelector('textarea[placeholder*="Write"]') as HTMLTextAreaElement;
+    if (textarea) {
+      textarea.value = '';
+    }
+    
+    // Minimal wait - just enough for clear to take effect
+    await sleep(10);
+    
+    // Reload immediately for seamless loop
     window.location.reload();
   };
 

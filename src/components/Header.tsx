@@ -6,11 +6,21 @@ import { Play } from 'lucide-react';
 export function Header() {
   const { isPlaybackActive, togglePlayback } = usePlayback();
 
+  const handleLogoClick = () => {
+    // If playback is active, stop it (which will also refresh)
+    // Otherwise, just refresh the page
+    if (isPlaybackActive) {
+      togglePlayback();
+    } else {
+      window.location.reload();
+    }
+  };
+
   return (
     <header className="border-b px-4 sm:px-6 py-3 sm:py-4" style={{ backgroundColor: '#FAF9F5' }}>
       <div className="flex items-center justify-between">
         <button 
-          onClick={() => window.location.reload()}
+          onClick={handleLogoClick}
           className="text-gray-900 cursor-pointer hover:opacity-80 transition-opacity"
           style={{ fontSize: '36px', fontWeight: 450, fontFamily: 'var(--font-serif)', letterSpacing: '-0.02em' }}
           aria-label="Refresh page"

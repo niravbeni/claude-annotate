@@ -21,13 +21,13 @@ CRITICAL JSON FORMATTING RULES:
 
 Annotation Types:
 1. "heart" - Validates writing that matches the writer's specific style profile (see below). ONLY use hearts for sentences that demonstrate the writer's strengths. (NO browserReference, NO alternatives)
-2. "squiggle-correction" - Factual errors like incorrect quotes, citations, facts (ALWAYS include browserReference with external source, NO alternatives)
+2. "squiggle-correction" - CONFIRMED factual errors like incorrect quotes, wrong citations, false facts. ONLY mark if you've verified the information is WRONG. Accurate quotes/facts should NOT be marked. (ALWAYS include browserReference with external source, NO alternatives)
 3. "squiggle-suggestion" - Creative alternatives/uncertain ideas (include browserReference if there's a helpful external source, OPTIONALLY include alternatives array with 2-3 alternative phrasings)
 4. "circle" - Logic/timeline/math inconsistencies WITHIN the text itself - VERIFY CAREFULLY before marking (NO browserReference - your comment must thoroughly explain the logic error with specific details, NO alternatives)
 
 WHEN TO USE EACH:
 - Use HEART for: Writing that demonstrates the writer's specific voice and strengths (see profile below)
-- Use SQUIGGLE-CORRECTION for: unverified quotes, citations, factual claims that need external verification
+- Use SQUIGGLE-CORRECTION for: INCORRECT quotes, citations, or facts ONLY after you've verified they're wrong. Do NOT mark quotes just because they're quotes - VERIFY FIRST, then only mark if actually incorrect. If a quote is accurate when you check the source, do NOT mark it.
 - Use SQUIGGLE-SUGGESTION for: Phrases/sentences that are weak or could benefit from reframing, style changes, lens shifts, or further exploration. Include alternatives ONLY when there's a genuinely worthwhile improvement (not for every squiggle). Alternatives should offer different framings, perspectives, or stylistic approaches while maintaining the writer's voice.
 - Use CIRCLE for: internal contradictions, timeline errors, math errors that you can PROVE by comparing parts of the text - ONLY mark if you're 100% certain the logic is contradictory. Double-check all calculations and dates before marking a circle.
 
@@ -216,21 +216,21 @@ Text:`;
     // Try to parse JSON with or without code blocks
     let parsed;
     try {
-      const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
+    const jsonMatch = responseText.match(/```json\n([\s\S]*?)\n```/);
       let jsonText = '';
       
-      if (jsonMatch) {
+    if (jsonMatch) {
         jsonText = jsonMatch[1];
-      } else {
+    } else {
         // Try to extract JSON from response
-        const jsonStart = responseText.indexOf('{');
+      const jsonStart = responseText.indexOf('{');
         const jsonEnd = responseText.lastIndexOf('}');
         
         if (jsonStart !== -1 && jsonEnd !== -1 && jsonEnd > jsonStart) {
           jsonText = responseText.slice(jsonStart, jsonEnd + 1);
-        } else {
-          throw new Error('No JSON found in response');
-        }
+      } else {
+        throw new Error('No JSON found in response');
+      }
       }
       
       // Try parsing
