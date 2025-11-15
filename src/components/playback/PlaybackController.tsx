@@ -454,10 +454,10 @@ export function PlaybackController() {
           for (let i = 0; i < previewCount; i++) {
             const prevAnn = allAnnotations[i];
             const isTarget = prevAnn === annotation;
-            console.log(`[Playback] Moving to annotation ${i + 1}/${previewCount} with arc`, isTarget ? '(TARGET)' : '');
-            // Move to annotation with arc
-            await moveCursorTo(prevAnn, true, true); // third param = withArc
-            console.log('[Playback] After arc, cursor at:', cursorPosRef.current);
+            console.log(`[Playback] Moving to annotation ${i + 1}/${previewCount}`, isTarget ? '(TARGET)' : '');
+            // Move to annotation without arc (straight movement)
+            await moveCursorTo(prevAnn, true, false); // third param = withArc = false
+            console.log('[Playback] After move, cursor at:', cursorPosRef.current);
             await sleep(500); // Reduced pause between annotations
           }
         }
