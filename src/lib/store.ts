@@ -32,7 +32,7 @@ const sortAnnotationIdsByPriority = (ids: string[], annotations: Annotation[]): 
 
 export const useAppStore = create<AppState>((set) => ({
   // Initial state - always DEFAULT_TEXT for SSR consistency
-  // PlaybackContext will clear it on client if needed
+  // PlaybackContext will clear it on client if in loop
   text: DEFAULT_TEXT,
   isEditing: false,
   isAnalyzing: false,

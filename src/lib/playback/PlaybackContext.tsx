@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useLayoutEffect, ReactNode } from 'react';
 import { useAppStore } from '@/lib/store';
 
 interface PlaybackContextType {
@@ -18,6 +18,16 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
   const [currentStep, setCurrentStep] = useState(0);
   const setText = useAppStore((state) => state.setText);
 
+  // Use layoutEffect to clear text BEFORE paint to prevent flash
+  useLayoutEffect(() => {
+    const isInLoop = sessionStorage.getItem('playbackInLoop') === 'true';
+    
+    if (isInLoop) {
+      // Clear text immediately before browser paints to prevent flash
+      setText('');
+    }
+  }, [setText]);
+
   // Check if we should auto-start playback after reload (only if in loop, not on first load)
   useEffect(() => {
     const shouldAutoStart = sessionStorage.getItem('playbackActive') === 'true';
@@ -25,19 +35,16 @@ export function PlaybackProvider({ children }: { children: ReactNode }) {
     
     if (shouldAutoStart && isInLoop) {
       console.log('[Playback] Auto-starting after reload (in loop)');
-      // Clear text IMMEDIATELY after mount (before any render) to prevent flash
-      setText('');
-      // Use setTimeout to ensure setState completes before starting playback
-      setTimeout(() => {
-        setIsPlaybackActive(true);
-        setCurrentStep(1);
-      }, 0);
+      // Text already cleared by layoutEffect
+      // Start playback immediately
+      setIsPlaybackActive(true);
+      setCurrentStep(1);
     } else if (shouldAutoStart && !isInLoop) {
       // Clean up stale sessionStorage if not in loop
       console.log('[Playback] Cleaning up stale playback session');
       sessionStorage.removeItem('playbackActive');
     }
-  }, [setText]);
+  }, []);
 
   const togglePlayback = () => {
     if (isPlaybackActive) {

@@ -873,10 +873,10 @@ export function PlaybackController() {
       textarea.value = '';
     }
     
-    // Minimal wait - just enough for clear to take effect
-    await sleep(10);
+    // Wait for DOM and state to clear before reload
+    await sleep(100);
     
-    // Reload immediately for seamless loop
+    // Reload for seamless loop (store will initialize with empty text due to playbackInLoop flag)
     window.location.reload();
   };
 
