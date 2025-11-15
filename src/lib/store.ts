@@ -322,7 +322,7 @@ export const useAppStore = create<AppState>((set) => ({
     })),
 
   // Apply alternative text to replace the annotated text in the editor
-  applyAlternativeText: (annotationId, newText) =>
+  applyAlternativeText: (annotationId, newText) => {
     set((state) => {
       // Find the annotation
       const annotation = state.annotations.find(a => a.id === annotationId);
@@ -389,7 +389,13 @@ export const useAppStore = create<AppState>((set) => ({
         annotations: updatedAnnotations,
         isEditing: true,
       };
-    }),
+    });
+    
+    // Dispatch event to trigger pulse animation
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('alternativeApplied'));
+    }
+  },
     
   // Update alternatives for an annotation
   updateAnnotationAlternatives: (annotationId, alternatives, alternativeStyles) => set((state) => ({

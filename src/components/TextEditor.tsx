@@ -32,6 +32,10 @@ export function TextEditor() {
   const [currentFrame, setCurrentFrame] = useState(0);
   const totalFrames = 15; // thinking0.png to thinking14.png
   
+  // Gradient background animation state
+  const [shouldPulse, setShouldPulse] = useState(false);
+  const prevAnalyzing = useRef(isAnalyzing);
+  
   const setEditing = (editing: boolean) => {
     if (editing) {
       // When entering edit mode, save current state
@@ -132,6 +136,7 @@ export function TextEditor() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [text, isAnalyzing]);
 
+
   // Animate Claude icon when analyzing
   useEffect(() => {
     if (isAnalyzing) {
@@ -146,6 +151,31 @@ export function TextEditor() {
     }
   }, [isAnalyzing]);
 
+  // Trigger pulse when analysis completes and annotations appear
+  useEffect(() => {
+    if (prevAnalyzing.current && !isAnalyzing && annotations.length > 0) {
+      // Analysis just completed with annotations
+      setShouldPulse(true);
+      const timeout = setTimeout(() => {
+        setShouldPulse(false);
+      }, 2500); // Long smooth fade - 2.5s matches CSS animation
+      return () => clearTimeout(timeout);
+    }
+    
+    prevAnalyzing.current = isAnalyzing;
+  }, [isAnalyzing, annotations.length]);
+
+  // Listen for alternative text application (pulse when suggestion is applied)
+  useEffect(() => {
+    const handleAlternativeApplied = () => {
+      setShouldPulse(true);
+      setTimeout(() => setShouldPulse(false), 2500);
+    };
+    
+    window.addEventListener('alternativeApplied', handleAlternativeApplied);
+    return () => window.removeEventListener('alternativeApplied', handleAlternativeApplied);
+  }, []);
+
   const showAnnotations = annotations.length > 0 && !isEditing;
   const hasAnnotations = annotations.length > 0;
 
@@ -157,7 +187,7 @@ export function TextEditor() {
     <div className="relative h-full flex flex-col overflow-hidden">
       {/* Text Content */}
       <div className="h-[calc(100vh-80px)] px-8 pt-6 pb-6 overflow-hidden" style={{ backgroundColor: '#FAF9F5' }}>
-        <div className="relative max-w-[700px] mx-auto h-full flex flex-col overflow-hidden">
+        <div className="relative max-w-[700px] mx-auto h-full flex flex-col">
           {/* Controls Bar - Above Text Box */}
           <div className="pb-2 flex items-center justify-between">
             {/* Left: Show Annotations Toggle */}
@@ -198,9 +228,21 @@ export function TextEditor() {
           </div>
           {showAnnotations ? (
             <>
-              {/* Annotated Text inside textbox outline */}
-              <div className="w-full flex-1 px-[56px] py-4 pt-[96px] pb-24 border rounded-lg bg-white overflow-hidden relative">
-                <AnnotatedText showTooltips={false} />
+              {/* Wrapper for glow effect - no overflow hidden */}
+              <div 
+                className={`flex-1 relative flex flex-col ${
+                  isAnalyzing 
+                    ? 'analyzing-border' 
+                    : shouldPulse 
+                    ? 'analyzing-pulse' 
+                    : ''
+                }`}
+              >
+                {/* Annotated Text inside textbox outline */}
+                <div 
+                  className="flex-1 px-[56px] py-4 pt-[96px] pb-24 border rounded-lg bg-white relative overflow-hidden"
+                >
+                  <AnnotatedText showTooltips={false} />
                 
                 {/* Claude Icon - top left */}
                 <div className="absolute top-3 left-3 z-10">
@@ -232,9 +274,9 @@ export function TextEditor() {
                     Copy
                   </span>
                 </button>
-              </div>
-              {/* Action Buttons - positioned at bottom right */}
-              <div className="absolute bottom-6 right-6 z-10 flex items-center gap-2">
+                
+                {/* Action Buttons - positioned at bottom right */}
+                <div className="absolute bottom-6 right-6 z-10 flex items-center gap-2">
                 {/* Edit Button */}
                 <button
                   onClick={() => setEditing(true)}
@@ -251,11 +293,24 @@ export function TextEditor() {
                   </svg>
                 </button>
               </div>
+                </div>
+                {/* Close inner white box */}
+              </div>
+              {/* Close glow wrapper */}
             </>
           ) : (
             <>
-              {/* Edit mode - clean textarea for editing */}
-              <div className="relative flex-1 flex flex-col">
+              {/* Wrapper for glow effect - no overflow hidden */}
+              <div 
+                className={`flex-1 relative flex flex-col ${
+                  isAnalyzing 
+                    ? 'analyzing-border' 
+                    : shouldPulse 
+                    ? 'analyzing-pulse' 
+                    : ''
+                }`}
+              >
+                {/* Edit mode - clean textarea for editing */}
                 <textarea
                   ref={textareaRef}
                   value={text}
@@ -265,7 +320,7 @@ export function TextEditor() {
                       setText(e.target.value);
                     }
                   }}
-                  className="w-full flex-1 px-[56px] py-4 pt-[88px] pb-16 editor-text border-2 border-gray-200 rounded-lg bg-white resize-none focus:outline-none focus:border-[#C6613F]"
+                  className="flex-1 px-[56px] py-4 pt-[88px] pb-16 editor-text border-2 border-gray-200 rounded-lg bg-white resize-none focus:outline-none focus:border-[#C6613F] relative"
                   style={{
                     cursor: 'text',
                     overflow: 'hidden',
@@ -304,7 +359,6 @@ export function TextEditor() {
                     Copy
                   </span>
                 </button>
-              </div>
               
               {/* Action Buttons - positioned at bottom right */}
               <div className="absolute bottom-6 right-6 z-20 flex items-center gap-2">
@@ -315,7 +369,8 @@ export function TextEditor() {
                   onClick={handleAnalyze}
                 />
               </div>
-
+              </div>
+              {/* Close glow wrapper */}
             </>
           )}
         </div>

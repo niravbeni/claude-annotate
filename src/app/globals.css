@@ -530,3 +530,67 @@ span strong {
 .editor-scroll::-webkit-scrollbar-thumb:hover {
   background: #9ca3af;
 }
+
+/* Rotating gradient border effect for analysis */
+@property --rotate {
+  syntax: "<angle>";
+  initial-value: 132deg;
+  inherits: false;
+}
+
+@keyframes spin {
+  0% {
+    --rotate: 0deg;
+  }
+  100% {
+    --rotate: 360deg;
+  }
+}
+
+/* Subtle glow during analysis */
+.analyzing-border {
+  position: relative;
+  border-radius: 10px;
+  box-shadow: 
+    0 0 15px 3px rgba(251, 146, 60, 0.3),
+    0 0 30px 6px rgba(251, 146, 60, 0.2),
+    0 0 45px 9px rgba(251, 146, 60, 0.1);
+  animation: glowBreathe 3s ease-in-out infinite;
+}
+
+/* Pulse effect - long smooth fade when complete or suggestion applied */
+.analyzing-pulse {
+  position: relative;
+  border-radius: 10px;
+  animation: glowFlash 2.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes glowBreathe {
+  0%, 100% {
+    box-shadow: 
+      0 0 15px 3px rgba(251, 146, 60, 0.3),
+      0 0 30px 6px rgba(251, 146, 60, 0.2),
+      0 0 45px 9px rgba(251, 146, 60, 0.1);
+  }
+  50% {
+    box-shadow: 
+      0 0 20px 4px rgba(251, 146, 60, 0.4),
+      0 0 40px 8px rgba(251, 146, 60, 0.3),
+      0 0 60px 12px rgba(251, 146, 60, 0.15);
+  }
+}
+
+@keyframes glowFlash {
+  0% { 
+    box-shadow: none;
+  }
+  20% { 
+    box-shadow: 
+      0 0 25px 5px rgba(251, 146, 60, 0.6),
+      0 0 50px 10px rgba(251, 146, 60, 0.4),
+      0 0 75px 15px rgba(251, 146, 60, 0.2);
+  }
+  100% { 
+    box-shadow: none;
+  }
+}
