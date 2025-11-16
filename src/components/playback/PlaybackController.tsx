@@ -7,7 +7,13 @@ import { useAppStore } from '@/lib/store';
 
 export function PlaybackController() {
   const { isPlaybackActive, currentStep, setStep, togglePlayback } = usePlayback();
-  const { setText, isAnalyzing } = useAppStore();
+  const { 
+    setText, 
+    isAnalyzing, 
+    setActiveAnnotation, 
+    setPinnedAnnotation,
+    closeBrowserModal 
+  } = useAppStore();
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const isExecutingRef = useRef(false);
 
@@ -859,25 +865,26 @@ export function PlaybackController() {
   };
 
   const executeRestart = async () => {
-    console.log('[Playback] Restarting loop - preparing for seamless reload...');
+    console.log('[Playback] Restarting loop - resetting all state...');
     
-    // Mark that we're in a loop FIRST
+    // Mark that we're in a loop for future sessions
     sessionStorage.setItem('playbackInLoop', 'true');
     
-    // Clear text before reload to prevent flash
+    // Close any open modals/panels
+    closeBrowserModal();
+    setActiveAnnotation(null, []);
+    setPinnedAnnotation(null, []);
+    
+    // Clear text immediately - this will trigger the orange glow fade
     setText('');
     
-    // Also clear DOM directly for instant visual update
-    const textarea = document.querySelector('textarea[placeholder*="Write"]') as HTMLTextAreaElement;
-    if (textarea) {
-      textarea.value = '';
-    }
+    // Wait for DOM to update and animations to start
+    await sleep(500);
     
-    // Wait for DOM and state to clear before reload
-    await sleep(100);
-    
-    // Reload for seamless loop (store will initialize with empty text due to playbackInLoop flag)
-    window.location.reload();
+    // Reset to step 1 to restart the playback
+    console.log('[Playback] Loop restart - back to step 1');
+    isExecutingRef.current = false;
+    setStep(1);
   };
 
   return null; // This component doesn't render anything
