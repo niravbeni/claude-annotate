@@ -68,6 +68,7 @@ export interface AppState {
   saveAnnotationWithChat: (annotationId: string) => void;
   loadSavedAnnotation: (index: number) => void;
   deleteSavedAnnotation: (index: number) => void;
+  clearAllSavedAnnotations: () => void;
   
   // Browser modal actions
   openBrowserModal: (reference: BrowserReference, position: { x: number; y: number }) => void;

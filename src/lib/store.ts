@@ -320,6 +320,12 @@ export const useAppStore = create<AppState>((set) => ({
     set((state) => ({
       savedAnnotations: state.savedAnnotations.filter((_, i) => i !== index),
     })),
+  
+  clearAllSavedAnnotations: () =>
+    set({
+      savedAnnotations: [],
+      annotationChats: {},
+    }),
 
   // Apply alternative text to replace the annotated text in the editor
   applyAlternativeText: (annotationId, newText) => {

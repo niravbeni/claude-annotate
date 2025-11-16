@@ -12,7 +12,8 @@ export function PlaybackController() {
     isAnalyzing, 
     setActiveAnnotation, 
     setPinnedAnnotation,
-    closeBrowserModal 
+    closeBrowserModal,
+    clearAllSavedAnnotations
   } = useAppStore();
   const timeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const isExecutingRef = useRef(false);
@@ -875,7 +876,11 @@ export function PlaybackController() {
     setActiveAnnotation(null, []);
     setPinnedAnnotation(null, []);
     
+    // Clear saved annotations and chats from previous loop
+    clearAllSavedAnnotations();
+    
     // Clear text immediately - this will trigger the orange glow fade
+    // This also clears annotations automatically
     setText('');
     
     // Wait for DOM to update and animations to start
